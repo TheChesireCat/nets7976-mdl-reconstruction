@@ -1,8 +1,11 @@
-# Whitelist: only each week's code/ folder (plus this file and the README) is tracked.
+# Whitelist: only each week's code/ folder, plus the site's landing page and config, is tracked.
 # Readings, slides, the syllabus and local tool settings stay out of the repo.
 /*
 !/.gitignore
+!/.vercelignore
 !/README.md
+!/index.html
+!/vercel.json
 !/week-*/
 /week-*/*
 !/week-*/code/

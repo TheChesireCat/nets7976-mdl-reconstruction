@@ -1,0 +1,12 @@
+# Same whitelist as .gitignore, so a manual `vercel deploy` from this folder uploads
+# only the code and the landing page, never the readings or the syllabus.
+/*
+!/index.html
+!/vercel.json
+!/week-*/
+/week-*/*
+!/week-*/code/
+__pycache__/
+*.py
+*.pyc
+.DS_Store

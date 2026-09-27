@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "trailingSlash": true,
+  "redirects": [
+    {
+      "source": "/martin{/}?",
+      "destination": "/week-3/code/martin-viz/",
+      "permanent": false
+    },
+    {
+      "source": "/newman{/}?",
+      "destination": "/week-3/code/newman-viz/",
+      "permanent": false
+    }
+  ]
+}
