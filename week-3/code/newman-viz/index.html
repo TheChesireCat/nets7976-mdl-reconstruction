@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Following the distributions · Newman (2018)</title>
+  <link rel="stylesheet" href="../viz-common/styles.css" />
+</head>
+<body>
+<div class="shell">
+  <nav class="side" aria-label="Sections">
+    <div class="brand">Following the distributions</div>
+    <div class="brand-sub">Newman, Nature Physics 14, 542 (2018)</div>
+    <a class="switch" href="../martin-viz/">← Martin et al. 2016</a>
+    <ol>
+      <li><a href="#map">The map</a></li>
+      <li><a href="#model">Model and data</a></li>
+      <li><a href="#fdr">False positives vs. false discoveries</a></li>
+      <li><a href="#em">Estimating θ with EM</a></li>
+      <li><a href="#posterior">The posterior over networks</a></li>
+      <li><a href="#many">One network or many?</a></li>
+      <li><a href="#compare">Newman vs. Martin</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <div class="controls" id="controls">
+      <span class="ctl-group-label">Synthetic network</span>
+      <label class="ctl">n <input type="range" id="c-n" min="50" max="400" step="10" value="200" /><output id="o-n"></output></label>
+      <label class="ctl">ρ <input type="range" id="c-rho" min="0.01" max="0.2" step="0.005" value="0.05" /><output id="o-rho"></output></label>
+      <label class="ctl">α <input type="range" id="c-alpha" min="0.1" max="0.95" step="0.01" value="0.6" /><output id="o-alpha"></output></label>
+      <label class="ctl">β <input type="range" id="c-beta" min="0.001" max="0.1" step="0.001" value="0.02" /><output id="o-beta"></output></label>
+      <label class="ctl">N <input type="range" id="c-N" min="1" max="10" step="1" value="3" /><output id="o-N"></output></label>
+      <button id="c-seed" title="Draw a new network with the same parameters">New sample</button>
+      <button id="c-preset" title="Newman's estimates for the reality-mining data">Reality-mining values</button>
+      <span class="status" id="status"></span>
+    </div>
+
+    <div class="content">
+      <header class="hero">
+        <div class="eyebrow">Week 3 · Network reconstruction from noisy data</div>
+        <h1>Which distribution are you holding?</h1>
+        <p class="lede">
+          Newman measures every pair of nodes <strong>N</strong> times and counts how often an edge shows up. Two unknowns sit
+          under those counts: the true network <strong>A</strong>, and the error rates of the measurement. This page follows one
+          synthetic network through the paper. The structure is simpler than Martin et al.: there are no groups, so given the
+          error rates every pair is independent, and the posterior over networks comes out <strong>exactly</strong>. The only
+          approximation left is plugging in one estimate of the error rates, and the last section shows what that costs.
+        </p>
+      </header>
+
+      <!-- 0 -->
+      <section id="map">
+        <div class="sec-head"><span class="sec-num">0</span><h2>The map</h2></div>
+        <div class="refs">The whole paper on one page. Click a box to jump to its section.</div>
+        <p>
+          <strong>Observed:</strong> the counts <span class="m">E_ij</span> (how many of the <span class="m">N</span> measurements saw an edge).
+          <strong>Latent:</strong> the network <span class="m">A</span>.
+          <strong>Parameters:</strong> <span class="m">θ = (ρ, α, β)</span>: the edge density, the true-positive rate and the false-positive rate.
+          Unlike Martin et al., the noise is <em>learned</em> (α and β are estimated) rather than removed by a calibration assumption.
+        </p>
+        <div class="card map-card"><div class="plot" id="p-map"></div></div>
+      </section>
+
+      <!-- 1 -->
+      <section id="model">
+        <div class="sec-head"><span class="sec-num">1</span><h2>Model and data</h2></div>
+        <div class="refs">Eqs. (1), (7), (8)</div>
+        <div class="transition">
+          <span class="dist">θ = (ρ, α, β)</span><span class="op"><b>sample</b></span>
+          <span class="dist to">P(A, E | θ)</span><span class="exactness">forward model</span>
+        </div>
+        <p>
+          Each pair is an edge with probability <span class="m">ρ</span>. Each of the <span class="m">N</span> measurements then sees a true edge
+          with probability <span class="m">α</span> and a non-edge with probability <span class="m">β</span>, so the count <span class="m">E_ij</span>
+          is binomial with one of two success rates. Everything the data say about a pair is in its count.
+        </p>
+        <div class="eq">P(A, E | θ) = P(E | A, θ) · P(A | θ)                         (chain rule)
+P(E | A, θ) = Π_{i&lt;j} [α^E (1−α)^(N−E)]^A_ij · [β^E (1−β)^(N−E)]^(1−A_ij)     (Eq. 7)
+P(A | θ)    = Π_{i&lt;j} ρ^A_ij (1−ρ)^(1−A_ij)             (only ρ enters)</div>
+        <div id="t-model"></div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Pairs by how often an edge was seen</h3>
+            <p class="sub">Count of pairs with each E, split by the truth. Log scale: most pairs are never seen at all.</p>
+            <div class="plot" id="p-counts"></div>
+          </div>
+          <div class="card">
+            <h3>Hidden network vs. what was measured</h3>
+            <p class="sub">Left: the true A. Right: E / N, the fraction of measurements that saw an edge.</p>
+            <div class="plot row" id="p-AE"></div>
+          </div>
+        </div>
+        <div class="takeaway">
+          <b>The middle bars are where inference matters.</b> Pairs seen 0 times or every time are easy. Pairs seen once or twice
+          are a mix of real edges that were often missed and non-edges that were occasionally reported, and only the error rates
+          can say which is more likely.
+        </div>
+      </section>
+
+      <!-- 2 -->
+      <section id="fdr">
+        <div class="sec-head"><span class="sec-num">2</span><h2>False positives vs. false discoveries</h2></div>
+        <div class="refs">p. 543 · the false discovery rate (1 − ρ)β / [ρα + (1 − ρ)β]</div>
+        <div class="transition">
+          <span class="dist">P(seen | A = 0) = β</span><span class="op"><b>Bayes' rule</b></span>
+          <span class="dist to">P(A = 0 | seen) = FDR</span><span class="exactness">exact</span>
+        </div>
+        <p>
+          The two rates condition on opposite things. The <strong>false-positive rate</strong> β asks: of the non-edges, what share
+          get reported? The <strong>false discovery rate</strong> asks: of the reports, what share are non-edges? Bayes' rule links
+          them through the density ρ, and in a sparse network non-edges vastly outnumber edges, so a tiny β can still produce
+          many false reports.
+        </p>
+        <div id="t-fdr"></div>
+        <div class="card">
+          <h3>One measurement, two ways of slicing it</h3>
+          <p class="sub">Top: what happens to non-edges. Bottom: where the reported edges come from. Same numbers, different denominator.</p>
+          <div class="plot" id="p-fdr"></div>
+        </div>
+        <div class="takeaway">
+          <b>The base rate does the damage.</b> Try the Reality-mining values: β is under 0.5%, yet about a quarter of single
+          reports are false, because there are roughly 29 non-edges for every edge. Repeated measurements are what rescue it:
+          a false report is rarely repeated.
+        </div>
+      </section>
+
+      <!-- 3 -->
+      <section id="em">
+        <div class="sec-head"><span class="sec-num">3</span><h2>Estimating θ with EM</h2></div>
+        <div class="refs">Eqs. (1)–(5)</div>
+        <div class="transition">
+          <span class="dist">P(A, θ | E)</span><span class="op"><b>sum over A</b></span>
+          <span class="dist">P(θ | E)</span><span class="op"><b>maximize</b></span>
+          <span class="dist to">θ̂</span><span class="exactness">exact sum · local max</span>
+        </div>
+        <p>
+          Newman maximizes <span class="m">P(θ | E)</span>, the posterior of the parameters with the network summed out. With the
+          uniform priors he assumes, that is the same point as the maximum of the likelihood <span class="m">P(E | θ)</span>. The sum over
+          all <span class="m">2^(n choose 2)</span> networks is exact here, because the pairs are independent given θ: it splits into one
+          two-term sum per pair. EM climbs it by alternating the E-step (compute every <span class="m">Q_ij</span> at the current θ, Eq. 6)
+          and the M-step (re-estimate θ from those <span class="m">Q</span>'s, Eq. 5).
+        </p>
+        <div id="t-em"></div>
+        <div class="card">
+          <h3>The landscape EM climbs</h3>
+          <p class="sub">log P(E | θ) over α and β, with ρ fixed at its estimate. Brighter is higher. The line is EM's path from its starting guess (projected onto this slice).</p>
+          <div class="plot" id="p-landscape"></div>
+        </div>
+        <div class="takeaway">
+          <b>Each M-step is "count, weighted by Q".</b> α̂ is the hit rate among pairs weighted by how likely each is to be an edge,
+          β̂ the hit rate weighted by how likely each is <em>not</em> to be one, and ρ̂ the average Q. EM never needs to decide which
+          pairs are edges.
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section id="posterior">
+        <div class="sec-head"><span class="sec-num">4</span><h2>The posterior over networks, for free</h2></div>
+        <div class="refs">Eqs. (3), (6), (12)</div>
+        <div class="transition">
+          <span class="dist">P(A, θ̂ | E)</span><span class="op"><b>condition</b> (divide by P(θ̂ | E))</span>
+          <span class="dist to">P(A | E, θ̂) = Π Q_ij^A_ij (1 − Q_ij)^(1 − A_ij)</span><span class="exactness">exact given θ̂</span>
+        </div>
+        <p>
+          The E-step's distribution is the posterior over networks at θ̂. Because pairs are independent given θ, it is a product
+          of one coin per pair, and every pair with the same count gets the same coin. So the whole posterior is just
+          <span class="m">N + 1</span> numbers: <span class="m">Q_0, …, Q_N</span>. Each is prior odds times evidence:
+        </p>
+        <div class="eq">log[Q / (1 − Q)] = log[ρ / (1 − ρ)]  +  E · log(α / β)  +  (N − E) · log[(1 − α) / (1 − β)]
+                   prior odds          each report     each miss</div>
+        <div class="section-controls">
+          <label class="ctl">Pick a count E <input type="range" id="c-e" min="0" max="3" step="1" value="1" /><output id="o-e"></output></label>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Q for every possible count</h3>
+            <p class="sub">Posterior edge probability at θ̂ (line), and the actual share of true edges among pairs with that count (dots).</p>
+            <div class="plot" id="p-Q"></div>
+          </div>
+          <div class="card">
+            <h3>Where that Q comes from</h3>
+            <p class="sub">The log-odds for the chosen count, built up term by term. Right of zero favours an edge.</p>
+            <div class="plot" id="p-logodds"></div>
+          </div>
+        </div>
+        <div class="takeaway">
+          <b>Compare Martin et al.</b> There, every pair's factor depended on two nodes' groups, which coupled all the pairs and
+          needed belief propagation. Here nothing couples the pairs once θ is fixed, so the exact posterior is a handful of numbers,
+          and you can draw whole networks from it by flipping independent coins.
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section id="many">
+        <div class="sec-head"><span class="sec-num">5</span><h2>One network or many?</h2></div>
+        <div class="refs">Supplementary Sec. S5 · and the EB-vs-full-Bayes script</div>
+        <div class="transition">
+          <span class="dist">P(A | E, θ̂)</span><span class="op"><b>sample networks</b>, then average</span>
+          <span class="dist to">P(f(A) | E) for any network measure f</span><span class="exactness">approximate: θ̂ plugged in</span>
+        </div>
+        <p>
+          Two tempting shortcuts, and what they cost. <strong>Shortcut 1:</strong> keep only the single most probable network
+          (every pair with Q &gt; ½). <strong>Shortcut 2:</strong> plug in θ̂ and ignore its uncertainty, which is what EM does.
+          The chart compares both with full Bayes, which also averages over θ (a Gibbs sampler), on one quantity: the total number of edges.
+        </p>
+        <div id="t-many"></div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>How many edges does the network have?</h3>
+            <p class="sub">Distribution of the edge count across networks drawn from each posterior, for this sample.</p>
+            <div class="plot" id="p-mdist"></div>
+          </div>
+          <div class="card">
+            <h3>Do the 90% intervals catch the truth?</h3>
+            <p class="sub">Share of freshly generated networks whose true edge count falls inside each method's 90% interval.</p>
+            <div class="plot" id="p-coverage"></div>
+          </div>
+        </div>
+        <div class="takeaway">
+          <b>Per pair, plugging in θ̂ is usually fine; for totals, it is overconfident.</b> At the default settings the two methods' Q's agree
+          to within about 0.005, but a small error in θ shifts every Q in the same direction, and across tens of thousands of pairs that adds up.
+          (Per-pair answers diverge too when the data barely pin θ down: try n = 50, or N = 1, where only the overall report rate
+          ρα + (1 − ρ)β is identifiable and ρ, α, β can't be separated.)
+          The single most probable network is worse: it drops every pair with Q below ½, so with few measurements it can
+          miss a large share of the edges. Lower N to see it.
+        </div>
+      </section>
+
+      <!-- 6 -->
+      <section id="compare">
+        <div class="sec-head"><span class="sec-num">6</span><h2>Newman vs. Martin</h2></div>
+        <div class="refs">Same recipe, different choices</div>
+        <p>Both papers write a joint, sum out what factorizes, point-estimate the parameters with EM, and read answers off the posterior.
+          They differ in what the data are and what couples the pairs.</p>
+        <div class="card">
+          <table class="recipe">
+            <thead><tr><th></th><th>Newman 2018</th><th>Martin et al. 2016</th></tr></thead>
+            <tbody>
+              <tr><td>Data</td><td>counts E_ij out of N measurements</td><td>one probability Q_ij per pair</td></tr>
+              <tr><td>Noise model</td><td>learned: α and β are parameters</td><td>removed: calibration makes β₀ cancel</td></tr>
+              <tr><td>Latent variables</td><td>the network A</td><td>the network A and the groups g</td></tr>
+              <tr><td>Summing out A</td><td><span class="pill exact">exact</span> one pair at a time</td><td><span class="pill exact">exact</span> one pair at a time, given g</td></tr>
+              <tr><td>Posterior of the hard latent</td><td><span class="pill exact">exact</span> product of N + 1 coins</td><td><span class="pill approx">approximate</span> BP over kⁿ assignments</td></tr>
+              <tr><td>Parameters</td><td>θ̂ by EM (MAP = ML, flat priors)</td><td>γ̂, ω̂ by EM (ML)</td></tr>
+              <tr><td>What you can sample</td><td>whole networks, by independent coins</td><td>edge marginals only; edges are correlated through g</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="takeaway">
+          <b>The design choice that decides everything is what couples the unknowns.</b> Independence given the parameters makes
+          the posterior exact and cheap; shared latent structure like communities makes it combinatorial and forces an approximation.
+          Adding groups to Newman's model would turn it into Martin's problem.
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+# Whitelist: only each week's code/ folder (plus this file and the README) is tracked.
+# Readings, slides, the syllabus and local tool settings stay out of the repo.
+/*
+!/.gitignore
+!/README.md
+!/week-*/
+/week-*/*
+!/week-*/code/
+
+__pycache__/
+*.pyc
+.DS_Store
