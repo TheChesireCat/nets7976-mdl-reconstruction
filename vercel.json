@@ -12,6 +12,16 @@
       "source": "/newman{/}?",
       "destination": "/week-3/code/newman-viz/",
       "permanent": false
+    },
+    {
+      "source": "/primer{/}?",
+      "destination": "/week-4/code/bayes-primer-viz/",
+      "permanent": false
+    },
+    {
+      "source": "/dolphins{/}?",
+      "destination": "/week-4/code/young-viz/",
+      "permanent": false
     }
   ]
 }
