@@ -1,0 +1,16 @@
+/* Week 5 additions on top of the Week 3 and Week 4 styles */
+
+ol.argument { margin: 22px 0 0; padding-left: 20px; max-width: 720px; font-size: 14.5px; }
+ol.argument li { margin: 4px 0; }
+.seg.small { margin: 0 0 8px; }
+.seg.small button { font-size: 11.5px; padding: 4px 10px; }
+input[type="range"].wide { width: 220px; }
+.raster canvas { display: block; width: 100%; border-radius: 4px; cursor: crosshair; image-rendering: pixelated; }
+table.recipe.card { padding: 4px 8px; margin: 4px 0 8px; max-width: 900px; display: table; }
+.recipe td:last-child { color: var(--text-muted); font-size: 12.5px; }
+.phase { font-family: var(--mono); color: var(--text-primary); }
+
+@media (max-width: 600px) {
+  input[type="range"].wide { width: 140px; }
+  table.recipe.card { display: block; overflow-x: auto; }
+}

@@ -22,6 +22,11 @@
       "source": "/dolphins{/}?",
       "destination": "/week-4/code/young-viz/",
       "permanent": false
+    },
+    {
+      "source": "/mdl{/}?",
+      "destination": "/week-5/code/peixoto-viz/",
+      "permanent": false
     }
   ]
 }

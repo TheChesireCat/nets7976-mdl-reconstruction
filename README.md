@@ -16,6 +16,7 @@ principle, network reconstruction from noisy data, and message-passing inference
 | `week-4/code/young-viz/` | Interactive walkthrough of Young, Cantwell & Newman (2020), *Bayesian inference of network structure from unreliable data*, on the dolphin data. |
 | `week-4/code/viz-common/` | The Week 4 samplers (Metropolis, HMC, R̂, ESS), the Poisson-mixture model, and a Web Worker that runs them. |
 | `week-4/code/stan_check.py` | Fits the dolphin models in CmdStan, to check the in-browser samplers against Stan. |
+| `week-5/code/peixoto-viz/` | Interactive walkthrough of Peixoto (2025), *Network reconstruction via the minimum description length principle*: L1 vs. the quantized MDL prior on a kinetic Ising model of the karate club, with the greedy fit animated. `precompute.mjs` (Node) regenerates its Fig. 2 data. |
 
 ## Running
 
@@ -41,7 +42,8 @@ The Week 4 pages import shared code from `week-3/`, so serve the repository root
 python -m http.server 8765
 ```
 
-and visit `http://localhost:8765/week-4/code/bayes-primer-viz/` and `http://localhost:8765/week-4/code/young-viz/`.
+and visit `http://localhost:8765/week-4/code/bayes-primer-viz/`, `http://localhost:8765/week-4/code/young-viz/`
+and `http://localhost:8765/week-5/code/peixoto-viz/`.
 Add `?test` to the primer's URL to log finite-difference checks of every gradient.
 
 The dolphin counts in `week-4/code/young-viz/data/dolphins.json` come from the authors' repository,

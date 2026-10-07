@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Network reconstruction by MDL · Peixoto (2025)</title>
+  <link rel="stylesheet" href="../../../week-3/code/viz-common/styles.css" />
+  <link rel="stylesheet" href="../../../week-4/code/viz-common/week4.css" />
+  <link rel="stylesheet" href="css/week5.css" />
+</head>
+<body>
+<div class="shell">
+  <nav class="side" aria-label="Sections">
+    <div class="brand">Reconstruction by MDL</div>
+    <div class="brand-sub">Peixoto, Phys. Rev. X 15, 011065 (2025)</div>
+    <a class="switch" href="../../../week-4/code/young-viz/">← Week 4: dolphins</a>
+    <ol>
+      <li><a href="#data">The data</a></li>
+      <li><a href="#l1">L1: sparsity costs shrinkage</a></li>
+      <li><a href="#density">A density is not a code</a></li>
+      <li><a href="#prior">The MDL prior</a></li>
+      <li><a href="#fit">Fitting it</a></li>
+      <li><a href="#cats">What categories buy</a></li>
+      <li><a href="#compare">MDL vs. L1 as data grow</a></li>
+      <li><a href="#left">What this page leaves out</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <div class="controls" id="controls">
+      <span class="ctl-group-label">True weights</span>
+      <span class="seg" id="c-mode"><button data-m="equal" class="on">≈ equal (paper)</button><button data-m="two">two strengths</button><button data-m="spread">spread out</button></span>
+      <label class="ctl">samples M <input type="range" id="c-M" min="0" max="8" step="1" value="4" /><output id="o-M"></output></label>
+      <button id="c-seed" title="Simulate a new time series">New data</button>
+      <span class="status" id="status"></span>
+    </div>
+
+    <div class="content">
+      <header class="hero">
+        <div class="eyebrow">Week 5 · Network reconstruction using the minimum description length principle</div>
+        <h1>How many edges does the data pay for?</h1>
+        <p class="lede">
+          A network with N nodes has N(N−1)/2 possible edges. Maximum likelihood switches on all of them, because a tiny weight
+          always fits the noise a little better than a zero. Peixoto's answer is to count bits: an edge stays only if
+          writing it down costs less than it saves in describing the data. Everything on this page is recomputed in
+          your browser from a simulated time series on Zachary's karate club, the network of the paper's Fig. 1.
+        </p>
+        <ol class="argument">
+          <li><strong>L1 regularization</strong> gets zeros by shrinking every weight, so sparsity and accuracy fight (§1).</li>
+          <li>A prior <strong>density</strong> on real weights is not a description length, so MAP can't choose the sparsity (§2).</li>
+          <li>Quantize the weights and let a hierarchy of discrete priors <strong>learn the weight distribution</strong> (§3).</li>
+          <li>The result is no longer convex, so fit it with greedy moves that each <strong>lower Σ</strong> (§4–5), and check it (§6).</li>
+        </ol>
+      </header>
+
+      <!-- 0 -->
+      <section id="data">
+        <div class="sec-head"><span class="sec-num">0</span><h2>The data</h2></div>
+        <div class="refs">§II · Eqs. (1)–(3), (A4) · Fig. 1 setup</div>
+        <div class="transition">
+          <span class="dist">W (34 × 34, 78 nonzero)</span><span class="op"><b>simulate</b></span>
+          <span class="dist to">X: x(0) → x(1) → … → x(M)</span><span class="exactness">kinetic Ising, θ = 0</span>
+        </div>
+        <p>
+          Each node is a spin, <span class="m">x_i = ±1</span>. At every step all spins update at once, each one leaning toward the
+          weighted sum of its neighbours' current spins. The 78 karate edges get weights drawn from
+          <span class="m">Normal(N/2E, 0.01)</span>, as in the paper, and the other 483 pairs get zero. The reconstruction sees only the
+          time series on the right and has to recover the network on the left.
+        </p>
+        <div class="eq">P(x(t+1) | x(t), W) = Π_i exp(x_i(t+1) h_i(t)) / 2cosh h_i(t),      h_i(t) = Σ_j W_ij x_j(t)</div>
+        <div id="t-data"></div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>The true network W</h3>
+            <p class="sub">Zachary's karate club, line width ∝ weight. Change the weights in the top bar.</p>
+            <div class="plot" id="p-true"></div>
+          </div>
+          <div class="card">
+            <h3>What the reconstruction sees</h3>
+            <p class="sub">The first 240 time steps, one row per node. Light is +1, dark is −1. Hover for the node and time.</p>
+            <div class="plot" id="p-raster"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 1 -->
+      <section id="l1">
+        <div class="sec-head"><span class="sec-num">1</span><h2>L1: sparsity costs shrinkage</h2></div>
+        <div class="refs">§III · Eqs. (6)–(11) · Fig. 1</div>
+        <div class="transition">
+          <span class="dist">P(W | λ) = Π λe^{−λ|W_ij|}/2</span><span class="op"><b>MAP</b></span>
+          <span class="dist">Ŵ(λ) = argmax log P(X|W) − λΣ|W_ij|</span><span class="op"><b>5-fold CV</b></span>
+          <span class="dist to">λ̂ = argmax Σ_k log P(X_k | Ŵ_k(λ))</span><span class="exactness">convex · 6 fits per λ</span>
+        </div>
+        <p>
+          The Laplace prior turns MAP into the LASSO. As λ grows, weights hit exactly zero one by one, so λ sets the density of the
+          network. Cross-validation is the usual way to pick it. But the same λ that removes spurious edges also pulls the true ones
+          toward zero. Drag λ, or click any chart, and watch both happen at once.
+        </p>
+        <div class="section-controls">
+          <label class="ctl">λ <input type="range" id="c-lam" min="0" max="27" step="1" value="10" /><output id="o-lam"></output></label>
+          <button id="c-lam-cv">λ from cross-validation</button>
+          <button id="c-lam-e">λ that gets E right</button>
+        </div>
+        <div id="t-l1"></div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Every inferred weight as λ changes</h3>
+            <p class="sub">Blue: true edges. Red: pairs that should be zero. Grey ticks at the right edge: the true weights (Fig. 1a, bottom).</p>
+            <div class="plot" id="p-paths"></div>
+          </div>
+          <div class="card">
+            <h3>The network at this λ</h3>
+            <p class="sub">Blue: true edges found. Red: spurious edges. Faint grey: true edges missed. Width ∝ inferred weight.</p>
+            <div class="plot" id="p-l1net"></div>
+          </div>
+        </div>
+        <div class="grid-3 mt">
+          <div class="card">
+            <h3>Held-out log-likelihood</h3>
+            <p class="sub">Summed over the 5 folds. Its peak is λ̂.</p>
+            <div class="plot" id="p-held"></div>
+          </div>
+          <div class="card">
+            <h3>Number of edges E</h3>
+            <p class="sub">The thin line is the true E = 78.</p>
+            <div class="plot" id="p-E"></div>
+          </div>
+          <div class="card">
+            <h3>Similarity to the truth</h3>
+            <p class="sub">Jaccard s(W, Ŵ) on weights and on the binary network, Eq. (11).</p>
+            <div class="plot" id="p-sim"></div>
+          </div>
+        </div>
+        <div class="takeaway" id="k-l1"></div>
+      </section>
+
+      <!-- 2 -->
+      <section id="density">
+        <div class="sec-head"><span class="sec-num">2</span><h2>A density is not a code length</h2></div>
+        <div class="refs">§IV · Eqs. (12)–(19) · footnote 58</div>
+        <div class="transition">
+          <span class="dist">Σ(X, W) = −log P(X | W) − log P(W)</span><span class="op"><b>needs</b></span>
+          <span class="dist to">P(W) a probability mass</span><span class="exactness">then Σ is a number of bits</span>
+        </div>
+        <p>
+          MDL reads <span class="m">−log P(X, W)</span> as the length of a message: bits for the data given W, plus bits for W.
+          That only works if <span class="m">P(W)</span> is a probability. A density <span class="m">p(w)</span> can exceed 1, so
+          <span class="m">−log p(w)</span> can be negative. Its value also changes if you change units, since p(w) does but the model
+          doesn't. To get a real code you have to say how precisely each weight is written down: round it to a grid of step
+          <span class="m">Δ</span>. Then each value has probability ≈ <span class="m">p(w)·Δ</span>, and precision costs
+          <span class="m">log(1/Δ)</span> bits per weight.
+        </p>
+        <div class="section-controls">
+          <label class="ctl">λ <input type="range" id="c-dl" min="1" max="80" step="1" value="20" /><output id="o-dl"></output></label>
+          <label class="ctl">precision Δ <input type="range" id="c-dd" min="-4" max="-0.7" step="0.05" value="-2" /><output id="o-dd"></output></label>
+        </div>
+        <div id="t-density"></div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Cost of writing down one weight</h3>
+            <p class="sub">Laplace density −log₂ p(w | λ), Eq. (18), vs. the quantized mass −log₂ P(w | λ, Δ), Eq. (19). Below 0 bits is not a code length.</p>
+            <div class="plot" id="p-cost"></div>
+          </div>
+          <div class="card">
+            <h3>What MAP over λ prefers</h3>
+            <p class="sub">Σ in bits on your data, for the true weights and for the empty network, as λ varies. Dots: each line's minimum.</p>
+            <div class="seg small" id="c-dens-kind"><button data-k="density" class="on">density prior, Eq. (7)</button><button data-k="mass">quantized + A, Eqs. (15), (19)</button></div>
+            <div class="plot" id="p-mapl"></div>
+          </div>
+        </div>
+        <div class="takeaway">
+          <b>With the density, the empty network wins once λ is large enough.</b> Each zero weight sits at the peak λ/2 of the
+          Laplace density, and that peak grows without bound. So jointly maximizing over W and λ sends λ → ∞ and W → 0, which is
+          why λ can't be learned by MAP and needs cross-validation. With quantized weights and an explicit
+          adjacency matrix A, a zero costs only its share of <span class="m">log C(N(N−1)/2, E)</span> bits, the empty network's Σ is bounded,
+          and the true network keeps its lead at every λ. Switch the toggle.
+        </div>
+      </section>
+
+      <!-- 3 -->
+      <section id="prior">
+        <div class="sec-head"><span class="sec-num">3</span><h2>The MDL prior: let the weights choose their own distribution</h2></div>
+        <div class="refs">§IV · Eqs. (15)–(27)</div>
+        <div class="transition">
+          <span class="dist">E ~ uniform</span><span class="op"><b>pick pairs</b></span>
+          <span class="dist">A | E uniform</span><span class="op"><b>K, z_k</b></span>
+          <span class="dist">z_k ~ quantized Laplace</span><span class="op"><b>counts m</b></span>
+          <span class="dist to">W_ij = z_{k(ij)}</span><span class="exactness">every level discrete</span>
+        </div>
+        <p>
+          The paper builds the prior in levels. First the number of edges E, then which pairs they are (A). Then, instead of
+          one Laplace draw per edge, a small set of K distinct values <span class="m">z_k</span> (the weight categories). Each edge
+          takes one of them, with category counts <span class="m">m_k</span> drawn uniformly. Summing out the category probabilities
+          gives the closed form of Eq. (27). Each nonzero weight now costs about <span class="m">log K</span> bits instead of
+          <span class="m">log(1/Δ)</span>. Precision is paid once per category, not once per edge. Below are draws from
+          each prior, with λ = 10 so the weights are on the karate scale.
+        </p>
+        <div class="eq">−log P(W) =  log(N(N−1)/2 + 1) + log C(N(N−1)/2, E)              which pairs        (Eq. 15)
+           + log E                                                  how many categories
+           + log E! − Σ_k log m_k! + log C(E−1, K−1)                which category each edge has   (Eq. 24)
+           + Σ_k [ λ|z_k| − log(e^{λΔ} − 1) + log 2 ]               the category values  (Eq. 25, Δ = 10⁻⁸)</div>
+        <div class="section-controls">
+          <label class="ctl">edges E <input type="range" id="c-pE" min="10" max="300" step="2" value="78" /><output id="o-pE"></output></label>
+          <label class="ctl">categories K <input type="range" id="c-pK" min="1" max="6" step="1" value="2" /><output id="o-pK"></output></label>
+          <button id="c-pdraw">Draw again</button>
+        </div>
+        <div class="grid-3">
+          <div class="card">
+            <h3>Laplace density, Eq. (7)</h3>
+            <p class="sub">Every pair gets a real weight. A draw is never sparse: zeros have probability 0.</p>
+            <div id="t-pr0"></div>
+            <div class="plot" id="p-pr0"></div>
+          </div>
+          <div class="card">
+            <h3>Sparse A + quantized Laplace, Eqs. (15), (19)</h3>
+            <p class="sub">Exactly E edges. Weights on a grid of step Δ = 0.02, but still shrunk toward zero by the Laplace shape.</p>
+            <div id="t-pr1"></div>
+            <div class="plot" id="p-pr1"></div>
+          </div>
+          <div class="card">
+            <h3>The full hierarchy, Eq. (27)</h3>
+            <p class="sub">E edges, but only K distinct values. The data, not the Laplace shape, decide where they go.</p>
+            <div id="t-pr2"></div>
+            <div class="plot" id="p-pr2"></div>
+          </div>
+        </div>
+        <div class="takeaway">
+          <b>Compare the "bits for W" tiles.</b> The density gives a negative number: an infinitely precise real number can't be
+          sent in fewer than zero bits. The quantized Laplace pays roughly log₂(1/Δ) per edge. The hierarchy pays
+          about log₂ K per edge, plus around 27 bits per category for its value. Shrinkage hasn't vanished, but it now acts only through
+          the K category values, a small part of the total.
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section id="fit">
+        <div class="sec-head"><span class="sec-num">4</span><h2>Fitting it: greedy moves that lower Σ</h2></div>
+        <div class="refs">§V · Eqs. (28)–(29) · merge-split moves of Ref. [64]</div>
+        <div class="transition">
+          <span class="dist">W = 0, z = ∅</span><span class="op"><b>sweep</b> edges, then categories</span>
+          <span class="dist to">Ŵ = argmin Σ(X, W)</span><span class="exactness">nonconvex · accept only if Σ drops</span>
+        </div>
+        <p>
+          The prior is no longer convex, so the paper replaces the LASSO solver with a set of moves. Each move is tried and kept
+          only if it shortens the description. One sweep runs through all of them, and the fit stops when a few sweeps in a row change
+          nothing. Press play to watch the fit on your data.
+        </p>
+        <table class="recipe card">
+          <tr><th>Move</th><th>What it proposes</th><th>Here</th></tr>
+          <tr><td>Edge update</td><td>For a pair (i, j), one of: (1) move it to an existing category z_k, (2) give it a new value, which opens a new category, (3) set it to 0.</td><td>All 561 pairs each sweep. The paper visits only the κN best candidates found by NNDescent, which is what makes it subquadratic.</td></tr>
+          <tr><td>Edge move</td><td>Slide an edge (i, j) to (i, u): same value, new endpoint.</td><td>One try per node per sweep.</td></tr>
+          <tr><td>Edge swap</td><td>Exchange endpoints of two edges, (i, j), (u, v) → (i, v), (u, j). Counts, and so the prior, are unchanged.</td><td>N tries per sweep.</td></tr>
+          <tr><td>Category value</td><td>Move one z_k, and with it every edge in that category.</td><td>A 1-D golden-section search.</td></tr>
+          <tr><td>Merge / split</td><td>Fuse two neighbouring categories, or cut one in two, then re-search the values.</td><td>One of each per sweep. The split cuts at the biggest gap in the values each edge would prefer, not at random.</td></tr>
+        </table>
+        <div class="section-controls mt">
+          <button id="c-play" class="primary">Play</button>
+          <button id="c-back">◀</button><button id="c-fwd">▶</button>
+          <label class="ctl">step <input type="range" id="c-frame" min="0" max="1" step="1" value="0" class="wide" /><output id="o-frame"></output></label>
+        </div>
+        <div id="t-fit"></div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Bits saved, and bits spent</h3>
+            <p class="sub">Relative to the empty network. Blue: fewer bits for the data. Orange: more bits for W. Violet: the net saving, which only ever rises.</p>
+            <div class="plot" id="p-trace"></div>
+          </div>
+          <div class="card">
+            <h3>The network at this step</h3>
+            <p class="sub">Blue: true edges found. Red: spurious. Faint grey: true edges not yet found.</p>
+            <div class="plot" id="p-fitnet"></div>
+          </div>
+          <div class="card">
+            <h3>Weights and their categories</h3>
+            <p class="sub">One dot per nonzero weight (blue true, red spurious). Violet lines: the categories z_k with their counts. Grey ticks: the true weights.</p>
+            <div class="plot" id="p-strip"></div>
+          </div>
+          <div class="card">
+            <h3>Where the bits for W go</h3>
+            <p class="sub">The four lines of Eq. (27) at this step, in bits.</p>
+            <div class="plot" id="p-ledger"></div>
+          </div>
+        </div>
+        <div class="takeaway">
+          <b>Greedy moves overshoot, then MDL cleans up.</b> In the first sweep each visited pair tries one of its options at random. For an empty pair that is "new
+          category" half the time, which is accepted whenever the edge saves more than the ≈ 27 bits its own value costs, so K shoots up. Pairs that are only
+          indirectly correlated also get in while the true paths between them are still missing. Once the true edges are in, those spurious
+          edges no longer pay for themselves and are removed, and merges fold the one-edge categories together. The bits for W (orange) fall
+          while the data bits saved stay level. With the default settings the fit ends with all 78 true edges, no spurious ones, in a single category.
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section id="cats">
+        <div class="sec-head"><span class="sec-num">5</span><h2>What the categories buy</h2></div>
+        <div class="refs">§IV, discussion after Eq. (27)</div>
+        <div class="transition">
+          <span class="dist">the fitted edges, fixed</span><span class="op"><b>force K</b></span>
+          <span class="dist to">Σ(K) = data bits + bits for W</span><span class="exactness">values re-searched for each K</span>
+        </div>
+        <p>
+          Keep the edges the fit found, but force them into K categories (1-D k-means, then the best value for each). More categories fit the
+          data a little better and cost about 27 bits each, plus the cost of saying which edge has which. The fit's own K is wherever
+          this curve bottoms out. With the paper's near-equal weights that is K = 1. Switch the top bar to
+          <strong>two strengths</strong> and the minimum moves to 2. With <strong>spread out</strong> it lands where extra resolution stops paying for itself.
+        </p>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Σ against the number of categories</h3>
+            <p class="sub">Each line relative to its own value at the best K. Hover a point for the category values.</p>
+            <div class="plot" id="p-K"></div>
+          </div>
+          <div class="card">
+            <h3>Fitted vs. true weights</h3>
+            <p class="sub">One dot per true edge, true weight against fitted weight. A dot at 0 is a missed edge. The diagonal is perfect recovery.</p>
+            <div class="plot" id="p-wvw"></div>
+          </div>
+        </div>
+        <div class="takeaway">
+          <b>No shrinkage, and no noise fitting.</b> A category's value is set by the likelihood of all its edges together, with only a
+          λ|z| ≈ 0.2-nat nudge from the prior, so the MDL weights land at the true level. L1 fits every weight separately, so its dots scatter
+          vertically: that spread is noise being described edge by edge. Move the §1 slider to the λ that gets E right and the whole orange cloud
+          drops well below the diagonal.
+        </div>
+      </section>
+
+      <!-- 6 -->
+      <section id="compare">
+        <div class="sec-head"><span class="sec-num">6</span><h2>MDL vs. L1 as data grow</h2></div>
+        <div class="refs">§V.A · Eq. (30) · Fig. 2</div>
+        <div class="transition">
+          <span class="dist">M = 100 … 3200</span><span class="op"><b>3 fits</b></span>
+          <span class="dist to">s(W, Ŵ), E</span><span class="exactness">precomputed · 3 data sets per point</span>
+        </div>
+        <p>
+          The paper's Fig. 2, for the karate network. Three ways of choosing Ŵ: the MDL prior; L1 with λ from 5-fold
+          cross-validation; and the "true" prior, a normal density with the true mean and spread on the nonzero weights, Eq. (30).
+          This is the one slow computation, about a minute per weight setting, so it was run beforehand with the same code
+          (<span class="m">node precompute.mjs</span>). Dots are means over three simulated data sets, whiskers their range. It follows the
+          top bar's weight setting.
+        </p>
+        <div class="grid-3">
+          <div class="card"><h3>Weighted similarity s(W, Ŵ)</h3><p class="sub">1 is perfect.</p><div class="plot" id="p-cW"></div></div>
+          <div class="card"><h3>Binary similarity s(A, Â)</h3><p class="sub">Right edges, regardless of weight.</p><div class="plot" id="p-cA"></div></div>
+          <div class="card"><h3>Edges inferred E</h3><p class="sub">The thin line is the true E = 78.</p><div class="plot" id="p-cE"></div></div>
+        </div>
+        <div class="takeaway">
+          <b>MDL errs toward too few edges, the others toward too many.</b> With little data MDL returns a sparse network,
+          because it can't yet afford more. The normal prior, even though it is the true one, overfits at small M: each edge placed at the
+          mode collects the density's bonus of log(1/(√(2π)σ)) ≈ 3.7 nats, a "negative cost" of exactly the kind §2 warns about.
+          L1 with cross-validation keeps about three times too many edges at every M, and its binary similarity doesn't improve with more data.
+        </div>
+      </section>
+
+      <!-- 7 -->
+      <section id="left">
+        <div class="sec-head"><span class="sec-num">7</span><h2>What this page leaves out</h2></div>
+        <div class="refs">§V.B–D, §VI</div>
+        <p>
+          <strong>Community structure (§V.B).</strong> Replacing the uniform <span class="m">P(A | E)</span> by a degree-corrected SBM gives
+          modular networks shorter descriptions, which regularizes further. Fitting it adds merge-split moves on the node partition (Ref. [64]). <strong>Node parameters (§V.C)</strong> such as Ising fields θ_i get the same quantized treatment, Eq. (34), with zero
+          allowed. They are fixed at zero here. <strong>Empirical cases.</strong> The paper then reconstructs the Brazilian congress votes and the
+          microbiome networks, where an L1 comparison is infeasible. On the microbiome it uses the fitted Ising model to predict which
+          species' removal tips the system into another macrostate.
+        </p>
+        <p class="note">
+          Implementation notes: kinetic Ising likelihood, exact, θ = 0. MDL uses λ = 1, Δ = 10⁻⁸ as in the paper, starts from the empty
+          network, and runs a fixed sequence of moves rather than the random order of graph-tool. L1 is cyclic coordinate descent with
+          a proximal Newton step per entry, on a grid of 28 λ values, warm-started from large λ down. The reference C++ implementation is in
+          graph-tool.
+        </p>
+      </section>
+    </div>
+  </main>
+</div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
