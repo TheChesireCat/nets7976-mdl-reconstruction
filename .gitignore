@@ -1,11 +1,11 @@
-# Whitelist: only each week's code/ folder, plus the site's landing page and config, is tracked.
+# Whitelist: only each week's code/ folder, plus the site's landing page and GitHub Pages files, is tracked.
 # Readings, slides, the syllabus and local tool settings stay out of the repo.
 /*
 !/.gitignore
-!/.vercelignore
+!/.nojekyll
+!/404.html
 !/README.md
 !/index.html
-!/vercel.json
 !/week-*/
 /week-*/*
 !/week-*/code/
@@ -13,4 +13,3 @@
 __pycache__/
 *.pyc
 .DS_Store
-.vercel

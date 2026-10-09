@@ -47,12 +47,17 @@ function recompute() {
   st.textContent = bad ? "⚠ α ≤ β: an edge is no more likely to be seen than a non-edge; the model can't tell them apart"
     : one ? "⚠ N = 1: the data only fix the overall report rate, so ρ, α and β can't be separated"
     : `${d.m.toLocaleString()} true edges among ${d.M.toLocaleString()} pairs`;
+  draw();
+  startCoverage();
+}
+
+// Redraw from the current fit without refitting: on resize and on a theme change.
+function draw() {
   renderModel();
   renderFDR();
   renderEM();
   renderPosterior();
   renderMany();
-  startCoverage();
 }
 
 // ---------------------------------------------------------------------------
@@ -243,12 +248,15 @@ function renderEM() {
   ctx.putImageData(img, 0, 0);
   el("image", { href: cv.toDataURL(), x: f.margin.l, y: f.margin.t, width: f.iw, height: f.ih, preserveAspectRatio: "none", style: "image-rendering: pixelated" }, f.plot);
   const pts = path.map((t) => [t.alpha, Math.log10(Math.max(1e-3, t.beta))]);
+  // a surface-coloured halo keeps the path and labels legible on both ends of the ramp
+  const halo = `paint-order: stroke; stroke: ${C.surface}; stroke-width: 3px; stroke-linejoin: round`;
+  line(f, pts, C.surface, { "stroke-width": 4 });
   line(f, pts, C.ink2, { "stroke-width": 1.5 });
   pts.forEach((p, k) => { if (k % 3 === 0) dot(f, p[0], p[1], C.ink2, 2.5); });
-  label(f, pts[0][0], pts[0][1], "start", { dx: 8, dy: 4, cls: "direct-label" });
+  label(f, pts[0][0], pts[0][1], "start", { dx: 8, dy: 4, cls: "direct-label" }).setAttribute("style", halo);
   dot(f, d.alpha, Math.log10(d.beta), C.edge, 6);
   dot(f, theta.alpha, Math.log10(theta.beta), C.model, 6);
-  label(f, theta.alpha, Math.log10(theta.beta), "θ̂", { dx: 10, dy: -8, cls: "direct-label strong" });
+  label(f, theta.alpha, Math.log10(theta.beta), "θ̂", { dx: 10, dy: -8, cls: "direct-label strong" }).setAttribute("style", halo);
   // hover: read the surface
   const hit = el("rect", { x: f.margin.l, y: f.margin.t, width: f.iw, height: f.ih, fill: "transparent" }, f.svg);
   hit.addEventListener("pointermove", (ev) => {
@@ -416,7 +424,7 @@ const obs = new IntersectionObserver((entries) => {
 document.querySelectorAll("section").forEach((s) => obs.observe(s));
 
 let rz = null;
-window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { renderMap(); recompute(); }, 200); });
+window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { renderMap(); if (S.data) draw(); }, 200); });
 
 syncOutputs();
 renderMap();

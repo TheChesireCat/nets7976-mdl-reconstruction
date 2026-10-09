@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Following the distributions · Martin, Ball &amp; Newman (2016)</title>
+  <script src="../viz-common/site.js"></script>
   <link rel="stylesheet" href="../viz-common/styles.css" />
 </head>
 <body>
@@ -59,10 +60,10 @@
         <p>
           The top row is the story the paper tells about how the data came to be. The bottom row is inference:
           running that story backwards. Four kinds of symbols appear, and keeping them apart is most of the work:
-          <strong>observed</strong> (the matrix <span class="m">Q</span>),
-          <strong>latent</strong> (the network <span class="m">A</span> and the groups <span class="m">g</span>),
-          <strong>parameters</strong> (<span class="m">γ</span>, <span class="m">ω</span>), and
-          <strong>nuisance</strong> (the noise densities <span class="m">β₀</span>, <span class="m">β₁</span>).
+          <strong>observed</strong> (the matrix <span class="m">\(Q\)</span>),
+          <strong>latent</strong> (the network <span class="m">\(A\)</span> and the groups <span class="m">\(g\)</span>),
+          <strong>parameters</strong> (<span class="m">\(\gamma\)</span>, <span class="m">\(\omega\)</span>), and
+          <strong>nuisance</strong> (the noise densities <span class="m">\(\beta_0\)</span>, <span class="m">\(\beta_1\)</span>).
         </p>
         <div class="card map-card"><div class="plot" id="p-map"></div></div>
       </section>
@@ -72,25 +73,25 @@
         <div class="sec-head"><span class="sec-num">1</span><h2>The generative model</h2></div>
         <div class="refs">Sec. II A · Eq. (1)</div>
         <div class="transition">
-          <span class="dist">parameters γ, ω</span><span class="op"><b>sample</b></span>
-          <span class="dist to">P(A, g | γ, ω)</span><span class="exactness">forward model</span>
+          <span class="dist">parameters \(\gamma, \omega\)</span><span class="op"><b>sample</b></span>
+          <span class="dist to">\(P(A, g \mid \gamma, \omega)\)</span><span class="exactness">forward model</span>
         </div>
         <p>
-          The stochastic block model. Each node picks a group with probability <span class="m">γ_r</span>
-          (here <span class="m">γ = (½, ½)</span>), and each pair is joined with probability
-          <span class="m">ω_{g_i g_j}</span>: <span class="m">ω_in</span> inside a group, <span class="m">ω_out</span> between groups.
+          The stochastic block model. Each node picks a group with probability <span class="m">\(\gamma_r\)</span>
+          (here <span class="m">\(\gamma = (\tfrac12, \tfrac12)\)</span>), and each pair is joined with probability
+          <span class="m">\(\omega_{g_i g_j}\)</span>: <span class="m">\(\omega_\text{in}\)</span> inside a group, <span class="m">\(\omega_\text{out}\)</span> between groups.
         </p>
-        <div class="eq">P(A, g | γ, ω) = Π_i γ_{g_i} · Π_{i&lt;j} ω_{g_i g_j}^{A_ij} (1 − ω_{g_i g_j})^{1 − A_ij}</div>
+        <div class="eq">\[ P(A, g \mid \gamma, \omega) = \prod_i \gamma_{g_i} \prod_{i&lt;j} \omega_{g_i g_j}^{A_{ij}} \, (1 - \omega_{g_i g_j})^{1 - A_{ij}} \]</div>
         <div id="t-model"></div>
         <div class="grid-2">
           <div class="card">
-            <h3>The true network A</h3>
+            <h3>The true network \(A\)</h3>
             <p class="sub">Adjacency matrix, rows and columns sorted by true group. Strips show group A and group B.</p>
             <div class="plot" id="p-A"></div>
           </div>
           <div class="card">
             <h3>What the block structure predicts</h3>
-            <p class="sub">Edge density inside and between groups: set by ω, and measured in this sample.</p>
+            <p class="sub">Edge density inside and between groups: set by \(\omega\), and measured in this sample.</p>
             <div class="plot" id="p-omega"></div>
           </div>
         </div>
@@ -106,39 +107,40 @@
         <div class="sec-head"><span class="sec-num">2</span><h2>The noise process</h2></div>
         <div class="refs">Sec. II A · Eqs. (2), (38), (39) · Fig. 2</div>
         <div class="transition">
-          <span class="dist">P(A, g | γ, ω)</span><span class="op"><b>multiply by</b> P(Q | A, g, γ, ω) = P(Q | A)</span>
-          <span class="dist to">P(Q, A, g | γ, ω)</span><span class="exactness">forward model + one assumption</span>
+          <span class="dist">\(P(A, g \mid \gamma, \omega)\)</span><span class="op"><b>multiply by</b> \(P(Q \mid A, g, \gamma, \omega) = P(Q \mid A)\)</span>
+          <span class="dist to">\(P(Q, A, g \mid \gamma, \omega)\)</span><span class="exactness">forward model + one assumption</span>
         </div>
         <p>
-          The experiment never shows <span class="m">A</span>. It reports a probability <span class="m">Q_ij</span> for every pair.
-          A true edge draws its <span class="m">Q</span> from the density <span class="m">β₁</span>; a non-edge draws it from
-          <span class="m">β₀</span>, which puts most of its mass exactly at zero. The paper's synthetic tests use Beta shapes,
-          and so does this page. Raise <strong>b₁</strong> in the top bar and the two densities slide together:
-          the data carry less information about <span class="m">A</span>.
+          The experiment never shows <span class="m">\(A\)</span>. It reports a probability <span class="m">\(Q_{ij}\)</span> for every pair.
+          A true edge draws its <span class="m">\(Q\)</span> from the density <span class="m">\(\beta_1\)</span>; a non-edge draws it from
+          <span class="m">\(\beta_0\)</span>, which puts most of its mass exactly at zero. The paper's synthetic tests use Beta shapes,
+          and so does this page. Raise <strong>\(b_1\)</strong> in the top bar and the two densities slide together:
+          the data carry less information about <span class="m">\(A\)</span>.
         </p>
-        <div class="eq">P(Q, A, g | γ, ω) = P(Q | A, g, γ, ω) · P(A, g | γ, ω)   ← chain rule
-                  = P(Q | A)          · P(A, g | γ, ω)   ← if Q ⟂ (g, γ, ω) | A
-
-P(Q | A) = Π_{i&lt;j} β₁(Q_ij)^{A_ij} · β₀(Q_ij)^{1 − A_ij}
-β₁ = Beta(a₁, b₁)        β₀ = c · Beta(a₁ − 1, b₁ + 1) + (1 − c) · δ(Q)</div>
+        <div class="eq">\[ \begin{aligned}
+          P(Q, A, g \mid \gamma, \omega) &amp;= P(Q \mid A, g, \gamma, \omega) \, P(A, g \mid \gamma, \omega) &amp;&amp; \leftarrow \text{chain rule} \\
+          &amp;= P(Q \mid A) \, P(A, g \mid \gamma, \omega) &amp;&amp; \leftarrow \text{if } Q \perp (g, \gamma, \omega) \mid A \\[6pt]
+          P(Q \mid A) &amp;= \prod_{i&lt;j} \beta_1(Q_{ij})^{A_{ij}} \, \beta_0(Q_{ij})^{1 - A_{ij}} \\
+          \beta_1 &amp;= \Beta(a_1, b_1) \qquad \beta_0 = c \cdot \Beta(a_1 - 1, b_1 + 1) + (1 - c) \cdot \delta(Q)
+        \end{aligned} \]</div>
         <div id="t-noise"></div>
         <div class="grid-2">
           <div class="card">
             <h3>Noise densities</h3>
-            <p class="sub">Density of the reported Q for true edges and for non-edges (the continuous part; the rest of β₀ is the spike at 0).</p>
+            <p class="sub">Density of the reported \(Q\) for true edges and for non-edges (the continuous part; the rest of \(\beta_0\) is the spike at 0).</p>
             <div class="plot" id="p-beta"></div>
           </div>
           <div class="card">
-            <h3>What you actually observe: Q</h3>
-            <p class="sub">Same pair order as A above. Compare with the true network.</p>
+            <h3>What you actually observe: \(Q\)</h3>
+            <p class="sub">Same pair order as \(A\) above. Compare with the true network.</p>
             <div class="plot row" id="p-AQ"></div>
           </div>
         </div>
         <div class="takeaway">
-          <b>Writing <span class="m">P(Q | A)</span> is a modeling claim, not notation.</b> It says that once you know whether an edge
+          <b>Writing <span class="m">\(P(Q \mid A)\)</span> is a modeling claim, not notation.</b> It says that once you know whether an edge
           exists, the groups don't change how likely the lab is to report it. If within-group interactions were easier to detect,
-          you would need <span class="m">β₁(Q | g_i, g_j)</span> instead. The joint is now complete, and everything later in the paper
-          comes from this one product by conditioning on <span class="m">Q</span> and summing out what you don't want.
+          you would need <span class="m">\(\beta_1(Q \mid g_i, g_j)\)</span> instead. The joint is now complete, and everything later in the paper
+          comes from this one product by conditioning on <span class="m">\(Q\)</span> and summing out what you don't want.
         </div>
       </section>
 
@@ -147,39 +149,38 @@ P(Q | A) = Π_{i&lt;j} β₁(Q_ij)^{A_ij} · β₀(Q_ij)^{1 − A_ij}
         <div class="sec-head"><span class="sec-num">3</span><h2>Calibration: getting rid of the unknown noise</h2></div>
         <div class="refs">Sec. II A · Eqs. (3)–(5), (40)</div>
         <div class="transition">
-          <span class="dist">two unknown densities β₀, β₁</span><span class="op"><b>constrain</b></span>
-          <span class="dist to">β₁ / β₀ = (Q/ρ) / ((1 − Q)/(1 − ρ))</span><span class="exactness">exact, if Q is calibrated</span>
+          <span class="dist">two unknown densities \(\beta_0, \beta_1\)</span><span class="op"><b>constrain</b></span>
+          <span class="dist to">\(\beta_1 / \beta_0 = (Q/\rho) \big/ \big((1 - Q)/(1 - \rho)\big)\)</span><span class="exactness">exact, if Q is calibrated</span>
         </div>
         <p>
-          The paper never learns <span class="m">β₀</span> or <span class="m">β₁</span>. It assumes the <span class="m">Q_ij</span>
-          are honest probabilities: of all pairs reported at <span class="m">Q = 0.3</span>, 30% really are edges.
+          The paper never learns <span class="m">\(\beta_0\)</span> or <span class="m">\(\beta_1\)</span>. It assumes the <span class="m">\(Q_{ij}\)</span>
+          are honest probabilities: of all pairs reported at <span class="m">\(Q = 0.3\)</span>, 30% really are edges.
           That single assumption fixes the <em>ratio</em> of the two densities (Eq. 4), and then
-          <span class="m">β₀</span> factors out of the likelihood as a constant (Eq. 6). A nuisance function has been
+          <span class="m">\(\beta_0\)</span> factors out of the likelihood as a constant (Eq. 6). A nuisance function has been
           removed without ever being estimated.
         </p>
         <p>
-          The trick is Bayes' rule in odds form. A calibrated <span class="m">Q</span> is a posterior, and dividing out the prior odds
+          The trick is Bayes' rule in odds form. A calibrated <span class="m">\(Q\)</span> is a posterior, and dividing out the prior odds
           leaves the likelihood ratio: how many times more probable this report is if the edge exists than if it doesn't.
         </p>
-        <div class="eq">posterior odds          =  likelihood ratio  ×  prior odds
-Q / (1 − Q)             =  β₁(Q) / β₀(Q)     ×  ρ / (1 − ρ)</div>
+        <div class="eq">\[ \underbrace{\frac{Q}{1 - Q}}_{\text{posterior odds}} = \underbrace{\frac{\beta_1(Q)}{\beta_0(Q)}}_{\text{likelihood ratio}} \times \underbrace{\frac{\rho}{1 - \rho}}_{\text{prior odds}} \]</div>
         <div class="grid-2">
           <div class="card">
-            <h3>Eq. (3): is Q calibrated?</h3>
-            <p class="sub">Fraction of pairs in each Q bin that are true edges. Calibration means the dots sit on the diagonal.</p>
+            <h3>Eq. (3): is \(Q\) calibrated?</h3>
+            <p class="sub">Fraction of pairs in each \(Q\) bin that are true edges. Calibration means the dots sit on the diagonal.</p>
             <div class="plot" id="p-calib"></div>
           </div>
           <div class="card">
             <h3>Eq. (4): what calibration hands the model</h3>
-            <p class="sub">The likelihood ratio β₁/β₀ implied by each Q (line), and measured from this sample's true edges (dots). Log scale.</p>
+            <p class="sub">The likelihood ratio \(\beta_1/\beta_0\) implied by each \(Q\) (line), and measured from this sample's true edges (dots). Log scale.</p>
             <div class="plot" id="p-lr"></div>
           </div>
         </div>
         <p class="note" style="margin-top:14px">
-          How this page generates calibrated noise: fixing a₁ and b₁ and requiring Eq. (4) forces the non-edge sparsity to
-          <span class="m">c = ρ b₁ / ((1 − ρ)(a₁ − 1))</span>. Eq. (40) as printed is the reciprocal of this; simulating with the printed
-          version gives visibly miscalibrated Q, and with the paper's Fig. 3a parameters it would need c ≈ 11.
-          If a slider setting would need c &gt; 1, the top bar warns you and calibration no longer holds exactly.
+          How this page generates calibrated noise: fixing \(a_1\) and \(b_1\) and requiring Eq. (4) forces the non-edge sparsity to
+          <span class="m">\(c = \rho\, b_1 \big/ \big((1 - \rho)(a_1 - 1)\big)\)</span>. Eq. (40) as printed is the reciprocal of this; simulating with the printed
+          version gives visibly miscalibrated \(Q\), and with the paper's Fig. 3a parameters it would need \(c \approx 11\).
+          If a slider setting would need \(c &gt; 1\), the top bar warns you and calibration no longer holds exactly.
         </p>
         <div class="takeaway">
           <b>Pattern to reuse:</b> when a piece of the model is unknown and you don't care about it, look for an assumption
@@ -193,32 +194,33 @@ Q / (1 − Q)             =  β₁(Q) / β₀(Q)     ×  ρ / (1 − ρ)</div>
         <div class="sec-head"><span class="sec-num">4</span><h2>Summing out the network</h2></div>
         <div class="refs">Sec. II A · Eqs. (6), (7), (18), (24)</div>
         <div class="transition">
-          <span class="dist">P(Q, A, g | γ, ω)</span><span class="op"><b>sum over A</b></span>
-          <span class="dist to">P(Q, g | γ, ω)</span><span class="exactness">exact · one pair at a time</span>
+          <span class="dist">\(P(Q, A, g \mid \gamma, \omega)\)</span><span class="op"><b>sum over A</b></span>
+          <span class="dist to">\(P(Q, g \mid \gamma, \omega)\)</span><span class="exactness">exact · one pair at a time</span>
         </div>
         <p>
-          Given the groups, every pair is independent. So the sum over all <span class="m">2^(n choose 2)</span> networks
-          splits into one two-term sum per pair: the <span class="m">A_ij = 1</span> term plus the <span class="m">A_ij = 0</span> term.
-          What is left is a factor <span class="m">F</span> per pair that depends on <span class="m">Q_ij</span> and on whether the two nodes share a group.
-          F is a straight line in <span class="m">Q</span>: at <span class="m">Q = 1</span> it is the ordinary block-model edge term
-          <span class="m">ω/ρ</span>, at <span class="m">Q = 0</span> the non-edge term <span class="m">(1 − ω)/(1 − ρ)</span>, and uncertain reports
-          average the two. It is a sum, not <span class="m">ω^Q (1 − ω)^(1−Q)</span>, because the true state was summed out, not treated as a fraction of an edge.
+          Given the groups, every pair is independent. So the sum over all <span class="m">\(2^{\binom{n}{2}}\)</span> networks
+          splits into one two-term sum per pair: the <span class="m">\(A_{ij} = 1\)</span> term plus the <span class="m">\(A_{ij} = 0\)</span> term.
+          What is left is a factor <span class="m">\(F\)</span> per pair that depends on <span class="m">\(Q_{ij}\)</span> and on whether the two nodes share a group.
+          \(F\) is a straight line in <span class="m">\(Q\)</span>: at <span class="m">\(Q = 1\)</span> it is the ordinary block-model edge term
+          <span class="m">\(\omega/\rho\)</span>, at <span class="m">\(Q = 0\)</span> the non-edge term <span class="m">\((1 - \omega)/(1 - \rho)\)</span>, and uncertain reports
+          average the two. It is a sum, not <span class="m">\(\omega^Q (1 - \omega)^{1 - Q}\)</span>, because the true state was summed out, not treated as a fraction of an edge.
         </p>
-        <div class="eq">P(Q, g | γ, ω) = Π_i γ_{g_i} · Π_{i&lt;j} F(Q_ij, ω_{g_i g_j})
-F(Q, ω) = Q ω / ρ  +  (1 − Q)(1 − ω) / (1 − ρ)
-          └─ A = 1 ─┘   └──── A = 0 ────┘</div>
+        <div class="eq">\[ \begin{aligned}
+          P(Q, g \mid \gamma, \omega) &amp;= \prod_i \gamma_{g_i} \prod_{i&lt;j} F(Q_{ij}, \omega_{g_i g_j}) \\
+          F(Q, \omega) &amp;= \underbrace{\frac{Q \, \omega}{\rho}}_{A = 1} + \underbrace{\frac{(1 - Q)(1 - \omega)}{1 - \rho}}_{A = 0}
+        \end{aligned} \]</div>
         <div class="section-controls">
-          <label class="ctl">Pick a reported value Q <input type="range" id="c-q" min="0" max="1" step="0.01" value="0.6" /><output id="o-q"></output></label>
+          <label class="ctl">Pick a reported value \(Q\) <input type="range" id="c-q" min="0" max="1" step="0.01" value="0.6" /><output id="o-q"></output></label>
         </div>
         <div class="grid-2">
           <div class="card">
-            <h3>Each observed Q votes on the groups</h3>
-            <p class="sub">F = P(Q | ω) / P(Q | ρ): how much better this pair's block-model edge probability explains Q than the network average does. Above 1 favours, below 1 disfavours.</p>
+            <h3>Each observed \(Q\) votes on the groups</h3>
+            <p class="sub">\(F = P(Q \mid \omega) / P(Q \mid \rho)\): how much better this pair's block-model edge probability explains \(Q\) than the network average does. Above 1 favours, below 1 disfavours.</p>
             <div class="plot" id="p-factor"></div>
           </div>
           <div class="card">
-            <h3>…and, given the groups, A comes back</h3>
-            <p class="sub">t = P(A_ij = 1 | Q_ij, g_i, g_j), Eq. (18): the A = 1 share of F. The diagonal is the raw Q.</p>
+            <h3>…and, given the groups, \(A\) comes back</h3>
+            <p class="sub">\(t = P(A_{ij} = 1 \mid Q_{ij}, g_i, g_j)\), Eq. (18): the \(A = 1\) share of \(F\). The diagonal is the raw \(Q\).</p>
             <div class="plot" id="p-t"></div>
           </div>
         </div>
@@ -235,19 +237,19 @@ F(Q, ω) = Q ω / ρ  +  (1 − Q)(1 − ω) / (1 − ρ)
         <div class="sec-head"><span class="sec-num">5</span><h2>The marginal likelihood and EM</h2></div>
         <div class="refs">Sec. II B · Eqs. (8)–(11), (16), (19) · on a 12-node toy network, where every sum is exact</div>
         <div class="transition">
-          <span class="dist">P(Q, g | γ, ω)</span><span class="op"><b>sum over g</b></span>
-          <span class="dist">P(Q | γ, ω)</span><span class="op"><b>maximize</b></span>
-          <span class="dist to">γ̂, ω̂</span><span class="exactness">exact here · 4,096 terms</span>
+          <span class="dist">\(P(Q, g \mid \gamma, \omega)\)</span><span class="op"><b>sum over g</b></span>
+          <span class="dist">\(P(Q \mid \gamma, \omega)\)</span><span class="op"><b>maximize</b></span>
+          <span class="dist to">\(\hat\gamma, \hat\omega\)</span><span class="exactness">exact here · 4,096 terms</span>
         </div>
         <p>
-          The parameters are chosen to maximize the marginal likelihood <span class="m">P(Q | γ, ω)</span>, the probability of the
-          data with the groups summed out (Eq. 8). For 12 nodes that sum has <span class="m">2¹² = 4,096</span> terms, so we can
-          draw it. To keep the picture 1-D, only <span class="m">ω_in</span> is free; <span class="m">ω_out</span> and <span class="m">γ</span> stay at their true values.
-          (With a flat prior on <span class="m">ω</span>, this maximum-likelihood point is also the MAP estimate.)
+          The parameters are chosen to maximize the marginal likelihood <span class="m">\(P(Q \mid \gamma, \omega)\)</span>, the probability of the
+          data with the groups summed out (Eq. 8). For 12 nodes that sum has <span class="m">\(2^{12} = 4{,}096\)</span> terms, so we can
+          draw it. To keep the picture 1-D, only <span class="m">\(\omega_\text{in}\)</span> is free; <span class="m">\(\omega_\text{out}\)</span> and <span class="m">\(\gamma\)</span> stay at their true values.
+          (With a flat prior on <span class="m">\(\omega\)</span>, this maximum-likelihood point is also the MAP estimate.)
         </p>
         <p>
-          EM never climbs <span class="m">log P(Q | ω)</span> directly. The <strong>E-step</strong> computes the posterior
-          <span class="m">q(g)</span> at the current <span class="m">ω</span> and builds the Jensen lower bound (Eq. 11), which touches the curve
+          EM never climbs <span class="m">\(\log P(Q \mid \omega)\)</span> directly. The <strong>E-step</strong> computes the posterior
+          <span class="m">\(q(g)\)</span> at the current <span class="m">\(\omega\)</span> and builds the Jensen lower bound (Eq. 11), which touches the curve
           there. The <strong>M-step</strong> jumps to the top of the bound. Repeat, and you climb the real curve.
         </p>
         <div class="section-controls">
@@ -267,12 +269,12 @@ F(Q, ω) = Q ω / ρ  +  (1 − Q)(1 − ω) / (1 − ρ)
         <div id="t-em"></div>
         <div class="card">
           <h3>Log marginal likelihood and the EM lower bound</h3>
-          <p class="sub">Curve: log P(Q | ω_in), Eq. (8), up to the β₀ constant dropped in Eq. (6). Violet: the bound Σ_g q(g) log[P(Q, g | ω_in) / q(g)], with q frozen at the last E-step.</p>
+          <p class="sub">Curve: \(\log P(Q \mid \omega_\text{in})\), Eq. (8), up to the \(\beta_0\) constant dropped in Eq. (6). Violet: the bound \(\sum_g q(g) \log\big[P(Q, g \mid \omega_\text{in}) / q(g)\big]\), with \(q\) frozen at the last E-step.</p>
           <div class="plot" id="p-em"></div>
         </div>
         <div class="takeaway">
-          <b>The gap between the curve and the bound is exactly KL(q ‖ P(g | Q, ω)).</b> The E-step makes it zero at the current
-          point; the M-step can only raise the curve. Notice what the M-step needs from <span class="m">q</span>: only the probability that
+          <b>The gap between the curve and the bound is exactly \(\mathrm{KL}\big(q \,\|\, P(g \mid Q, \omega)\big)\).</b> The E-step makes it zero at the current
+          point; the M-step can only raise the curve. Notice what the M-step needs from <span class="m">\(q\)</span>: only the probability that
           each pair of nodes shares a group. The full distribution over 4,096 assignments is never used, which is why
           belief propagation (Section 7) only has to supply one- and two-node marginals.
         </div>
@@ -281,16 +283,16 @@ F(Q, ω) = Q ω / ρ  +  (1 − Q)(1 − ω) / (1 − ρ)
       <!-- 6 -->
       <section id="posterior">
         <div class="sec-head"><span class="sec-num">6</span><h2>The posterior over groups</h2></div>
-        <div class="refs">Sec. II B · Eqs. (12)–(15) · same toy network, at the current ω from Section 5</div>
+        <div class="refs">Sec. II B · Eqs. (12)–(15) · same toy network, at the current \(\omega\) from Section 5</div>
         <div class="transition">
-          <span class="dist">P(Q, g | γ̂, ω̂)</span><span class="op"><b>condition on Q</b> (divide by Eq. 8)</span>
-          <span class="dist to">q(g) = P(g | Q, γ̂, ω̂)</span><span class="exactness">exact here · BP at scale</span>
+          <span class="dist">\(P(Q, g \mid \hat\gamma, \hat\omega)\)</span><span class="op"><b>condition on Q</b> (divide by Eq. 8)</span>
+          <span class="dist to">\(q(g) = P(g \mid Q, \hat\gamma, \hat\omega)\)</span><span class="exactness">exact here · BP at scale</span>
         </div>
         <p>
-          The E-step's <span class="m">q(g)</span> is the answer to "which nodes belong together?". It is a distribution over all
-          <span class="m">2ⁿ</span> assignments. The model can't tell group A from group B, so every assignment and its mirror image
-          have the same probability. As a result, every single-node marginal <span class="m">q_i</span> is exactly ½. The meaningful quantity
-          is the <strong>co-membership</strong> probability <span class="m">P(g_i = g_j | Q)</span>, which doesn't care about labels.
+          The E-step's <span class="m">\(q(g)\)</span> is the answer to "which nodes belong together?". It is a distribution over all
+          <span class="m">\(2^n\)</span> assignments. The model can't tell group A from group B, so every assignment and its mirror image
+          have the same probability. As a result, every single-node marginal <span class="m">\(q_i\)</span> is exactly \(\tfrac12\). The meaningful quantity
+          is the <strong>co-membership</strong> probability <span class="m">\(P(g_i = g_j \mid Q)\)</span>, which doesn't care about labels.
         </p>
         <div id="t-post"></div>
         <div class="grid-3">
@@ -302,27 +304,27 @@ F(Q, ω) = Q ω / ρ  +  (1 − Q)(1 − ω) / (1 − ρ)
           </div>
           <div class="card">
             <h3>Exact co-membership</h3>
-            <p class="sub">P(g_i = g_j | Q), summing all 4,096 assignments.</p>
+            <p class="sub">\(P(g_i = g_j \mid Q)\), summing all 4,096 assignments.</p>
             <div class="plot" id="p-comem-exact"></div>
           </div>
           <div class="card">
             <h3>Belief propagation's version</h3>
-            <p class="sub">From BP marginals: q_i q_j + (1 − q_i)(1 − q_j). BP picks one of the two mirror images.</p>
+            <p class="sub">From BP marginals: \(q_i q_j + (1 - q_i)(1 - q_j)\). BP picks one of the two mirror images.</p>
             <div class="plot" id="p-comem-bp"></div>
           </div>
         </div>
         <div class="card" style="margin-top:16px">
-          <h3>Plugging in ω vs. averaging over it</h3>
-          <p class="sub">EM hands you P(g | Q, ω̂): the posterior at one value of ω (empirical Bayes). Full Bayes averages it over P(ω_in | Q) instead. On 12 nodes ω is poorly pinned down, so this is the hardest case for the plug-in.</p>
+          <h3>Plugging in \(\omega\) vs. averaging over it</h3>
+          <p class="sub">EM hands you \(P(g \mid Q, \hat\omega)\): the posterior at one value of \(\omega\) (empirical Bayes). Full Bayes averages it over \(P(\omega_\text{in} \mid Q)\) instead. On 12 nodes \(\omega\) is poorly pinned down, so this is the hardest case for the plug-in.</p>
           <div class="grid-2">
             <div class="plot" id="p-omega-post"></div>
             <div class="plot" id="p-ebfb"></div>
           </div>
         </div>
         <div class="takeaway">
-          <b>ω is very uncertain, yet the co-membership barely moves.</b> Per-pair answers are insensitive to ω across its plausible range,
-          which is why EM's plug-in is usually fine for them, and with hundreds of nodes P(ω | Q) is a narrow spike anyway. The plug-in
-          goes wrong in two situations: when ω̂ sits far from where the posterior mass is (press Reset in Section 5 and watch the dots leave
+          <b>\(\omega\) is very uncertain, yet the co-membership barely moves.</b> Per-pair answers are insensitive to \(\omega\) across its plausible range,
+          which is why EM's plug-in is usually fine for them, and with hundreds of nodes \(P(\omega \mid Q)\) is a narrow spike anyway. The plug-in
+          goes wrong in two situations: when \(\hat\omega\) sits far from where the posterior mass is (press Reset in Section 5 and watch the dots leave
           the diagonal), and for totals over many pairs, where small shifts add up (the edge-count result from the EB-vs-full-Bayes script).
         </div>
       </section>
@@ -332,30 +334,30 @@ F(Q, ω) = Q ω / ρ  +  (1 − Q)(1 − ω) / (1 − ρ)
         <div class="sec-head"><span class="sec-num">7</span><h2>Belief propagation at scale</h2></div>
         <div class="refs">Sec. II C · Eqs. (27)–(34), (16), (19) · Sec. III A · Fig. 3(a)</div>
         <div class="transition">
-          <span class="dist">q(g) over 2ⁿ assignments</span><span class="op"><b>approximate</b></span>
-          <span class="dist to">marginals q_r^i, q_rs^ij</span><span class="exactness">approximate · exact on trees</span>
+          <span class="dist">\(q(g)\) over \(2^n\) assignments</span><span class="op"><b>approximate</b></span>
+          <span class="dist to">marginals \(q_r^i, q_{rs}^{ij}\)</span><span class="exactness">approximate · exact on trees</span>
         </div>
         <p>
           With <span id="bp-n">200</span> nodes the sum in Eq. (14) has <span class="m" id="bp-states">2²⁰⁰</span> terms. Belief propagation
-          replaces it with messages <span class="m">η^{i→j}_r</span>: node <span class="m">i</span>'s belief about its own group if
-          <span class="m">j</span> were removed. It returns exactly the one- and two-node marginals the M-step needs, and EM alternates
+          replaces it with messages <span class="m">\(\eta^{i \to j}_r\)</span>: node <span class="m">\(i\)</span>'s belief about its own group if
+          <span class="m">\(j\)</span> were removed. It returns exactly the one- and two-node marginals the M-step needs, and EM alternates
           BP with the parameter updates (Eqs. 16, 19).
         </p>
         <div id="t-bp"></div>
         <div class="grid-2">
           <div class="card">
             <h3>EM converging</h3>
-            <p class="sub">ω̂ after each round of BP + M-step. Thin gray lines: the true values.</p>
+            <p class="sub">\(\hat\omega\) after each round of BP + M-step. Thin gray lines: the true values.</p>
             <div class="plot" id="p-traj"></div>
           </div>
           <div class="card">
-            <h3>Node marginals q_i(B)</h3>
+            <h3>Node marginals \(q_i(B)\)</h3>
             <p class="sub">One dot per node, split into rows by its true group. Good inference pushes the rows to opposite ends.</p>
             <div class="plot" id="p-strip"></div>
           </div>
           <div class="card wide">
             <h3>Using Q directly vs. thresholding it first</h3>
-            <p class="sub">Fraction of nodes put in the right group. Gray: cut Q at τ, then fit the ordinary block model to the 0/1 network (average of 3 random starts). Violet: this paper's method, which uses every Q.</p>
+            <p class="sub">Fraction of nodes put in the right group. Gray: cut \(Q\) at \(\tau\), then fit the ordinary block model to the 0/1 network (average of 3 random starts). Violet: this paper's method, which uses every \(Q\).</p>
             <div class="plot" id="p-thresh"></div>
           </div>
         </div>
@@ -371,19 +373,19 @@ F(Q, ω) = Q ω / ρ  +  (1 − Q)(1 − ω) / (1 − ρ)
         <div class="sec-head"><span class="sec-num">8</span><h2>Edge recovery</h2></div>
         <div class="refs">Sec. IV · Eq. (41) · Fig. 5</div>
         <div class="transition">
-          <span class="dist">t_rs^ij and q_rs^ij</span><span class="op"><b>sum over groups</b></span>
-          <span class="dist to">P(A_ij = 1 | Q)</span><span class="exactness">uses BP marginals</span>
+          <span class="dist">\(t_{rs}^{ij}\) and \(q_{rs}^{ij}\)</span><span class="op"><b>sum over groups</b></span>
+          <span class="dist to">\(P(A_{ij} = 1 \mid Q)\)</span><span class="exactness">uses BP marginals</span>
         </div>
         <p>
           Finally the network itself. The posterior edge probability averages Eq. (18) over the two nodes' groups:
-          <span class="m">P(A_ij = 1 | Q) = Σ_rs t_rs^ij q_rs^ij</span>. A pair whose nodes probably share a group is pulled
-          above its raw <span class="m">Q</span>; a pair that probably straddles two groups is pushed below it.
+          <span class="m">\(P(A_{ij} = 1 \mid Q) = \sum_{rs} t_{rs}^{ij}\, q_{rs}^{ij}\)</span>. A pair whose nodes probably share a group is pulled
+          above its raw <span class="m">\(Q\)</span>; a pair that probably straddles two groups is pushed below it.
         </p>
         <div id="t-edges"></div>
         <div class="grid-2">
           <div class="card">
             <h3>How the model moves each pair</h3>
-            <p class="sub">Posterior edge probability against the raw Q, for pairs with Q &gt; 0.</p>
+            <p class="sub">Posterior edge probability against the raw \(Q\), for pairs with \(Q &gt; 0\).</p>
             <div class="plot" id="p-move"></div>
           </div>
           <div class="card">
@@ -395,7 +397,7 @@ F(Q, ω) = Q ω / ρ  +  (1 − Q)(1 − ω) / (1 − ρ)
         <div class="takeaway">
           <b>This is a marginal, not a network.</b> Each pair's probability is right on its own, but edges are correlated
           through the shared groups, so you cannot sample a whole network by flipping these coins independently.
-          Compare Newman 2018, where the edges are independent given θ and the marginals <em>are</em> the whole posterior.
+          Compare Newman 2018, where the edges are independent given \(\theta\) and the marginals <em>are</em> the whole posterior.
         </div>
       </section>
 
@@ -411,13 +413,13 @@ F(Q, ω) = Q ω / ρ  +  (1 − Q)(1 − ω) / (1 − ρ)
           <table class="recipe">
             <thead><tr><th>Step</th><th>In this paper</th><th>Distribution you hold afterwards</th><th>How</th></tr></thead>
             <tbody>
-              <tr><td>1. Write the joint</td><td>SBM × noise model, Eqs. (1), (2)</td><td><span class="m">P(Q, A, g | γ, ω)</span></td><td>modeling</td></tr>
-              <tr><td>2. Sort the symbols</td><td>observed Q · latent A, g · parameters γ, ω · nuisance β₀, β₁</td><td>—</td><td>bookkeeping</td></tr>
-              <tr><td>3. Cancel nuisances</td><td>calibration, Eqs. (3)–(6)</td><td><span class="m">β₀</span> becomes a constant</td><td><span class="pill exact">exact</span></td></tr>
-              <tr><td>4. Sum out easy latents</td><td>A, one pair at a time, Eq. (7)</td><td><span class="m">P(Q, g | γ, ω)</span></td><td><span class="pill exact">exact</span></td></tr>
-              <tr><td>5. Posterior of hard latents</td><td>g, Eq. (14) via BP</td><td><span class="m">q(g) ≈ P(g | Q, γ, ω)</span>, as marginals</td><td><span class="pill approx">approximate</span></td></tr>
-              <tr><td>6. Point-estimate parameters</td><td>EM on Eq. (8)</td><td><span class="m">γ̂, ω̂</span></td><td><span class="pill approx">local max</span></td></tr>
-              <tr><td>7. Answer questions</td><td>edges, Eq. (41); groups, Eq. (12)</td><td><span class="m">P(A_ij = 1 | Q)</span>, <span class="m">q_r^i</span></td><td>expectations under step 5</td></tr>
+              <tr><td>1. Write the joint</td><td>SBM × noise model, Eqs. (1), (2)</td><td><span class="m">\(P(Q, A, g \mid \gamma, \omega)\)</span></td><td>modeling</td></tr>
+              <tr><td>2. Sort the symbols</td><td>observed \(Q\) · latent \(A, g\) · parameters \(\gamma, \omega\) · nuisance \(\beta_0, \beta_1\)</td><td>—</td><td>bookkeeping</td></tr>
+              <tr><td>3. Cancel nuisances</td><td>calibration, Eqs. (3)–(6)</td><td><span class="m">\(\beta_0\)</span> becomes a constant</td><td><span class="pill exact">exact</span></td></tr>
+              <tr><td>4. Sum out easy latents</td><td>\(A\), one pair at a time, Eq. (7)</td><td><span class="m">\(P(Q, g \mid \gamma, \omega)\)</span></td><td><span class="pill exact">exact</span></td></tr>
+              <tr><td>5. Posterior of hard latents</td><td>\(g\), Eq. (14) via BP</td><td><span class="m">\(q(g) \approx P(g \mid Q, \gamma, \omega)\)</span>, as marginals</td><td><span class="pill approx">approximate</span></td></tr>
+              <tr><td>6. Point-estimate parameters</td><td>EM on Eq. (8)</td><td><span class="m">\(\hat\gamma, \hat\omega\)</span></td><td><span class="pill approx">local max</span></td></tr>
+              <tr><td>7. Answer questions</td><td>edges, Eq. (41); groups, Eq. (12)</td><td><span class="m">\(P(A_{ij} = 1 \mid Q)\)</span>, <span class="m">\(q_r^i\)</span></td><td>expectations under step 5</td></tr>
             </tbody>
           </table>
         </div>

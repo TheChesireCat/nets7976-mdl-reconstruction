@@ -2,16 +2,23 @@
 
 const NS = "http://www.w3.org/2000/svg";
 
-export const C = (() => {
+// The palette, read from the CSS tokens. Re-read on "themechange" (site.js), which is
+// followed by "resize", so each page redraws with the new values. Read C.* when drawing,
+// never into a module-level constant, or the colour will not follow the theme.
+export const C = {};
+export const isLight = () => document.documentElement.dataset.theme === "light";
+function readPalette() {
   const cs = getComputedStyle(document.documentElement);
   const v = (name) => cs.getPropertyValue(name).trim();
-  return {
+  Object.assign(C, {
     surface: v("--surface-1"), grid: v("--grid"), axis: v("--axis"),
     ink: v("--text-primary"), ink2: v("--text-secondary"), muted: v("--text-muted"),
     g1: v("--g1"), g2: v("--g2"), edge: v("--edge"), nonedge: v("--nonedge"),
     model: v("--model"), neutral: v("--neutral"),
-  };
-})();
+  });
+}
+readPalette();
+window.addEventListener("themechange", readPalette);
 
 export function el(tag, attrs = {}, parent = null) {
   const e = document.createElementNS(NS, tag);
@@ -231,10 +238,22 @@ export function ramp(stops) {
   };
 }
 
-// Edge ramp: surface (no edge) to bright aqua (certain edge). One hue, dark -> light.
-export const edgeRamp = ramp(["#1a1a19", "#113f30", "#156b4d", "#199e70", "#4cc497", "#a6ecd0"]);
-// Model ramp: surface to bright violet, for quantities the method computes.
-export const modelRamp = ramp(["#1a1a19", "#2c2850", "#474090", "#6b62c6", "#9085e9", "#d2cdf8"]);
+// A sequential ramp with its own steps per theme, both starting at that theme's chart surface
+// (so zero recedes into the card) and running to the strong end.
+export function themedRamp(darkStops, lightStops) {
+  const d = ramp(darkStops), l = ramp(lightStops);
+  return (t) => (isLight() ? l : d)(t);
+}
+// Edge ramp: surface (no edge) to strong aqua (certain edge). One hue.
+export const edgeRamp = themedRamp(
+  ["#1a1a19", "#113f30", "#156b4d", "#199e70", "#4cc497", "#a6ecd0"],
+  ["#fcfcfb", "#c6eedd", "#82d5b1", "#1baf7a", "#13845b", "#0a5139"],
+);
+// Model ramp: surface to strong violet, for quantities the method computes.
+export const modelRamp = themedRamp(
+  ["#1a1a19", "#2c2850", "#474090", "#6b62c6", "#9085e9", "#d2cdf8"],
+  ["#fcfcfb", "#dedbf5", "#b1aae6", "#7d71cf", "#4a3aa7", "#2b2066"],
+);
 
 export function heatmap(container, { n, order, value, groups = null, size = 340, tooltip, colors = edgeRamp }) {
   const wrap = document.createElement("div");

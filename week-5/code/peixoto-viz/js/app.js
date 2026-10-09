@@ -7,7 +7,7 @@ const $ = (id) => document.getElementById(id);
 const clear = (id) => { const e = $(id); e.replaceChildren(); return e; };
 const LN2 = Math.log(2), bits = (nats) => nats / LN2;
 const Ms = [100, 200, 400, 600, 1000, 1600, 2400, 3200, 4000];
-const MDLc = C.model, L1c = C.g2, NORMc = C.edge;
+// Method colours, read at draw time so they follow the theme: MDL is C.model, L1 C.g2, the true normal prior C.edge.
 
 const S = {
   mode: "equal", M: 1000, seed: 1, gen: 0,
@@ -310,8 +310,8 @@ function renderDensity() {
   line(f, ws.map((w) => [w, dens(w)]), C.g2);
   // the mass lives on the grid wΔ, w ≠ 0
   const g = clipped(f), n = Math.floor(0.5 / D);
-  if (n <= 60) for (let k = -n; k <= n; k++) { if (k) g.appendChild(dot(f, k * D, mass(k * D), MDLc, 2.6)); }
-  else { g.appendChild(line(f, ws.filter((w) => w < 0).map((w) => [w, mass(w)]), MDLc)); g.appendChild(line(f, ws.filter((w) => w > 0).map((w) => [w, mass(w)]), MDLc)); }
+  if (n <= 60) for (let k = -n; k <= n; k++) { if (k) g.appendChild(dot(f, k * D, mass(k * D), C.model, 2.6)); }
+  else { g.appendChild(line(f, ws.filter((w) => w < 0).map((w) => [w, mass(w)]), C.model)); g.appendChild(line(f, ws.filter((w) => w > 0).map((w) => [w, mass(w)]), C.model)); }
   label(f, 0.5, mass(0.5), "quantized mass", { anchor: "end", dx: -2, dy: -8, cls: "direct-label strong" });
   label(f, 0.5, dens(0.5), "density", { anchor: "end", dx: -2, dy: 14 });
   label(f, -0.5, 0, "below 0 bits", { dy: 14 });
@@ -403,7 +403,7 @@ function weightHist(box, W, bw) {
   const top = Math.max(...bins.values());
   for (const [k, c] of bins) {
     const x = f.xs(k * step), w = Math.max(1.5, f.xs(step) - f.xs(0) - 1);
-    el("rect", { x: x - w / 2, y: f.ys(c / top), width: w, height: f.ys(0) - f.ys(c / top), fill: bw === 0 ? C.neutral : MDLc, opacity: 0.85 }, f.plot);
+    el("rect", { x: x - w / 2, y: f.ys(c / top), width: w, height: f.ys(0) - f.ys(c / top), fill: bw === 0 ? C.neutral : C.model, opacity: 0.85 }, f.plot);
   }
 }
 
@@ -426,7 +426,7 @@ function renderFit() {
   });
   line(f, gain.map((v, k) => [k, v]), C.g1);
   line(f, cost.map((v, k) => [k, v]), C.g2);
-  line(f, net.map((v, k) => [k, v]), MDLc, { "stroke-width": 2.5 });
+  line(f, net.map((v, k) => [k, v]), C.model, { "stroke-width": 2.5 });
   const n = snaps.length - 1;
   label(f, n, gain[n], "data bits saved", { anchor: "end", dx: -2, dy: -8 });
   label(f, n, net[n], "net saving", { anchor: "end", dx: -2, dy: 16, cls: "direct-label strong" });
@@ -469,7 +469,7 @@ function renderStrip(W, s) {
   const f = frame(box, { height: 230, margin: { t: 26, r: 14, b: 40, l: 14 }, x: { domain: [lo, hi], label: "weight" }, xFormat: (v) => fmt(v, 2), y: { domain: [0, 1], ticks: [] } });
   for (const v of S.net.W) if (v) el("line", { x1: f.xs(v), x2: f.xs(v), y1: f.ys(0), y2: f.ys(0) - 7, stroke: C.ink2, opacity: 0.5 }, f.plot);
   s.z.forEach((z, k) => {
-    el("line", { x1: f.xs(z), x2: f.xs(z), y1: f.ys(0.06), y2: f.ys(1), stroke: MDLc, "stroke-width": 1.5, opacity: s.z.length > 6 ? 0.5 : 1 }, f.plot);
+    el("line", { x1: f.xs(z), x2: f.xs(z), y1: f.ys(0.06), y2: f.ys(1), stroke: C.model, "stroke-width": 1.5, opacity: s.z.length > 6 ? 0.5 : 1 }, f.plot);
     if (s.z.length > 4) return;
     const t = el("text", { x: f.xs(z), y: f.margin.t - 8 - 11 * (k % 2), "text-anchor": "middle", class: "direct-label strong" }, f.svg);
     t.textContent = `${fmt(z, 3)} · m = ${s.m[k]}`;
@@ -489,7 +489,7 @@ const LEDGER = [
   ["assign", "which category each edge has", "log E! − Σ log m_k! + log C(E−1, K−1)"],
   ["values", "the category values", "Σ λ|z_k| − log(e^{λΔ}−1) + log 2"],
 ];
-const LEDGER_C = [C.neutral, C.muted, C.g1, MDLc];
+const ledgerColors = () => [C.neutral, C.muted, C.g1, C.model];
 
 function renderLedger(s) {
   const box = clear("p-ledger"), last = S.fit.snaps[S.fit.snaps.length - 1];
@@ -497,7 +497,7 @@ function renderLedger(s) {
   const f = frame(box, { height: 230, margin: { t: 10, r: 70, b: 40, l: 150 }, x: { domain: [0, maxTot * 1.02], label: "bits" }, xFormat: (v) => fmt(v, 0), y: { domain: [0, LEDGER.length], ticks: [] } });
   LEDGER.forEach(([, name, formula], r) => {
     const y0 = f.ys(LEDGER.length - r - 0.2), y1 = f.ys(LEDGER.length - r - 0.8);
-    const rect = el("rect", { x: f.xs(0), y: y0, width: Math.max(1, f.xs(vals[r]) - f.xs(0)), height: y1 - y0, fill: LEDGER_C[r], opacity: 0.9 }, f.plot);
+    const rect = el("rect", { x: f.xs(0), y: y0, width: Math.max(1, f.xs(vals[r]) - f.xs(0)), height: y1 - y0, fill: ledgerColors()[r], opacity: 0.9 }, f.plot);
     const t = el("text", { x: f.margin.l - 8, y: (y0 + y1) / 2 + 4, "text-anchor": "end", class: "direct-label" }, f.svg); t.textContent = name;
     const v = el("text", { x: f.xs(vals[r]) + 6, y: (y0 + y1) / 2 + 4, class: "direct-label strong" }, f.plot); v.textContent = fmt(vals[r], 1);
     rect.addEventListener("pointermove", (e) => showTip(e, [{ value: `${fmt(vals[r], 1)} bits`, label: formula }, { value: `${fmt(bits(last.parts[LEDGER[r][0]]), 1)} bits`, label: "at the end of the fit" }], name));
@@ -533,7 +533,7 @@ function renderCats() {
     y: { domain: [Math.min(...all) - 10, Math.max(...all) + 10], label: "bits, relative to the best K" }, yFormat: (v) => fmt(v, 0),
   });
   refLine(f, [[0.7, 0], [ks.length + 0.3, 0]]);
-  [[D, C.g1, "data"], [Mo, C.g2, "bits for W"], [T, MDLc, "Σ"]].forEach(([a, c, name]) => {
+  [[D, C.g1, "data"], [Mo, C.g2, "bits for W"], [T, C.model, "Σ"]].forEach(([a, c, name]) => {
     line(f, a.map((v, k) => [ks[k].K, v]), c, { "stroke-width": name === "Σ" ? 2.5 : 2 });
     a.forEach((v, k) => {
       const d = dot(f, ks[k].K, v, c, k === b && name === "Σ" ? 6 : 3.5);
@@ -552,13 +552,13 @@ function renderWvW() {
   const x0 = Math.min(...tw), x1 = Math.max(...tw), pad = Math.max(0.03, 0.15 * (x1 - x0));
   let hi = x1 + pad; for (let p = 0; p < PP.P; p++) if (S.net.W[p]) hi = Math.max(hi, Wm[p], Wl[p]);
   const box = clear("p-wvw");
-  legend(box, [{ label: "MDL", color: MDLc, type: "dot" }, { label: `L1 at λ = ${fmt(S.lams[S.li], 1)} (§1 slider)`, color: L1c, type: "dot" }]);
+  legend(box, [{ label: "MDL", color: C.model, type: "dot" }, { label: `L1 at λ = ${fmt(S.lams[S.li], 1)} (§1 slider)`, color: C.g2, type: "dot" }]);
   const g = frame(box, { height: 240, x: { domain: [Math.max(0, x0 - pad), x1 + pad], label: "true weight" }, xFormat: (v) => fmt(v, 2), y: { domain: [0, hi * 1.04], label: "fitted weight" }, yFormat: (v) => fmt(v, 2) });
   refLine(g, [[Math.max(0, x0 - pad), Math.max(0, x0 - pad)], [x1 + pad, x1 + pad]], C.ink2);
   for (let p = 0; p < PP.P; p++) {
     if (!S.net.W[p]) continue;
-    el("circle", { cx: g.xs(S.net.W[p]), cy: g.ys(Math.max(0, Wl[p])), r: 2.6, fill: L1c, opacity: 0.75 }, g.plot);
-    el("circle", { cx: g.xs(S.net.W[p]), cy: g.ys(Math.max(0, Wm[p])), r: 2.6, fill: MDLc, opacity: 0.9 }, g.plot);
+    el("circle", { cx: g.xs(S.net.W[p]), cy: g.ys(Math.max(0, Wl[p])), r: 2.6, fill: C.g2, opacity: 0.75 }, g.plot);
+    el("circle", { cx: g.xs(S.net.W[p]), cy: g.ys(Math.max(0, Wm[p])), r: 2.6, fill: C.model, opacity: 0.9 }, g.plot);
   }
 }
 
@@ -574,7 +574,7 @@ async function loadCompare() {
 function renderCompare() {
   const C2 = S.compare;
   if (!C2) return;
-  const rows = C2.modes[S.mode], LM = C2.Ms.map(Math.log10), methods = [["mdl", "MDL", MDLc], ["normal", "true (normal) prior", NORMc], ["l1", "L1 + 5-fold CV", L1c]];
+  const rows = C2.modes[S.mode], LM = C2.Ms.map(Math.log10), methods = [["mdl", "MDL", C.model], ["normal", "true (normal) prior", C.edge], ["l1", "L1 + 5-fold CV", C.g2]];
   const xopt = { domain: [LM[0] - 0.1, LM[LM.length - 1] + 0.1], label: "samples M", ticks: LM }, xf = (v) => String(Math.round(10 ** v));
   const chart = (id, get, yopt, ref = null) => {
     const box = clear(id);

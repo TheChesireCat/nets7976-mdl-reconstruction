@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dolphin network reconstruction · Young et al. (2020)</title>
+  <script src="../../../week-3/code/viz-common/site.js"></script>
   <link rel="stylesheet" href="../../../week-3/code/viz-common/styles.css" />
   <link rel="stylesheet" href="../viz-common/week4.css" />
 </head>
@@ -53,9 +54,9 @@
         <div class="sec-head"><span class="sec-num">0</span><h2>The map</h2></div>
         <div class="refs">§2 and Appendix A on one page. Click a box to jump to its section.</div>
         <p>
-          <strong>Observed:</strong> counts <span class="m">X_ij</span>. <strong>Latent:</strong> the network <span class="m">A</span>.
-          <strong>Parameters:</strong> <span class="m">θ = (λ₀, λ₁, ρ)</span>. The trick of the paper is the order of the
-          bottom row: sample θ with A summed out, then draw networks given each θ.
+          <strong>Observed:</strong> counts <span class="m">\(X_{ij}\)</span>. <strong>Latent:</strong> the network <span class="m">\(A\)</span>.
+          <strong>Parameters:</strong> <span class="m">\(\theta = (\lambda_0, \lambda_1, \rho)\)</span>. The trick of the paper is the order of the
+          bottom row: sample \(\theta\) with \(A\) summed out, then draw networks given each \(\theta\).
         </p>
         <div class="card map-card"><div class="plot" id="p-map"></div></div>
       </section>
@@ -72,8 +73,8 @@
         <div id="t-data"></div>
         <div class="grid-2">
           <div class="card">
-            <h3>Interaction counts X_ij</h3>
-            <p class="sub">Brighter means seen together more often. Hover a cell for the count.</p>
+            <h3>Interaction counts \(X_{ij}\)</h3>
+            <p class="sub">Stronger shading means seen together more often. Hover a cell for the count.</p>
             <div class="plot" id="p-X"></div>
           </div>
           <div class="card">
@@ -89,36 +90,40 @@
         <div class="sec-head"><span class="sec-num">2</span><h2>Three modelling choices</h2></div>
         <div class="refs">Eqs. (2.1)–(2.3), (3.1)–(3.3)</div>
         <div class="transition">
-          <span class="dist">P(θ)</span><span class="op"><b>network model</b></span>
-          <span class="dist">P(A | θ) = Π ν_ij(A_ij)</span><span class="op"><b>data model</b></span>
-          <span class="dist to">P(X | A, θ) = Π μ_ij(A_ij)</span><span class="exactness">the user's only input</span>
+          <span class="dist">\(P(\theta)\)</span><span class="op"><b>network model</b></span>
+          <span class="dist">\(P(A \mid \theta) = \prod \nu_{ij}(A_{ij})\)</span><span class="op"><b>data model</b></span>
+          <span class="dist to">\(P(X \mid A, \theta) = \prod \mu_{ij}(A_{ij})\)</span><span class="exactness">the user's only input</span>
         </div>
         <p>
           The paper asks for three choices and does the rest automatically. The <strong>data model</strong> says what a count looks like
-          for an edge and for a non-edge. The <strong>network model</strong> is the prior on edges. Then there is a <strong>prior on θ</strong>.
-          Pairs are conditionally independent given θ, which is what makes everything below exact apart from the sampling.
+          for an edge and for a non-edge. The <strong>network model</strong> is the prior on edges. Then there is a <strong>prior on \(\theta\)</strong>.
+          Pairs are conditionally independent given \(\theta\), which is what makes everything below exact apart from the sampling.
         </p>
-        <div class="eq">data model     μ_ij(1) = Poisson(X_ij | λ₁)       μ_ij(0) = Poisson(X_ij | λ₀)       λ₁ &gt; λ₀   (breaks the symmetry)
-network model  ν_ij(1) = ρ                        ν_ij(0) = 1 − ρ
-prior on θ     ρ ~ Uniform(0, 1)                  λ_k ~ Normal⁺(1, 100)   (the authors' code; the text says half-normal, σ = 100)</div>
+        <div class="eq">\[
+\begin{aligned}
+&\text{data model} \quad && \mu_{ij}(1) = \Poisson(X_{ij} \mid \lambda_1) \quad && \mu_{ij}(0) = \Poisson(X_{ij} \mid \lambda_0) \quad && \lambda_1 &gt; \lambda_0 \quad \text{(breaks the symmetry)} \\
+&\text{network model} \quad && \nu_{ij}(1) = \rho && \nu_{ij}(0) = 1 - \rho \\
+&\text{prior on } \theta \quad && \rho \sim \Uniform(0, 1) && \lambda_k \sim \Normal^{+}(1, 100) && \text{(the authors' code; the text says half-normal, } \sigma = 100\text{)}
+\end{aligned}
+\]</div>
         <div class="takeaway">
-          <b>Why λ₁ &gt; λ₀?</b> Without it, "edge" and "non-edge" can swap names (λ₀ ↔ λ₁, ρ ↔ 1 − ρ) and nothing in the likelihood
+          <b>Why \(\lambda_1 &gt; \lambda_0\)?</b> Without it, "edge" and "non-edge" can swap names (\(\lambda_0 \leftrightarrow \lambda_1\), \(\rho \leftrightarrow 1 - \rho\)) and nothing in the likelihood
           changes. The <a class="inline" href="../bayes-primer-viz/#symmetry">primer's §6</a> shows what that does to the chains.
         </div>
       </section>
 
       <!-- 3 -->
       <section id="sampling">
-        <div class="sec-head"><span class="sec-num">3</span><h2>Sampling θ with the network summed out</h2></div>
+        <div class="sec-head"><span class="sec-num">3</span><h2>Sampling \(\theta\) with the network summed out</h2></div>
         <div class="refs">Eqs. (A.11)–(A.12) · §3.1.2 · Figs. 3a, 3b</div>
         <div class="transition">
-          <span class="dist">P(A, θ | X)</span><span class="op"><b>sum over A</b> (one sum per pair)</span>
-          <span class="dist">P(θ | X) ∝ P(θ) Π_ij Σ_k μ_ij(k) ν_ij(k)</span><span class="op"><b>MCMC</b></span>
-          <span class="dist to">θ⁽¹⁾, …, θ⁽ᵐ⁾</span><span class="exactness">exact sum · sampled</span>
+          <span class="dist">\(P(A, \theta \mid X)\)</span><span class="op"><b>sum over \(A\)</b> (one sum per pair)</span>
+          <span class="dist">\(P(\theta \mid X) \propto P(\theta) \prod_{ij} \sum_k \mu_{ij}(k)\, \nu_{ij}(k)\)</span><span class="op"><b>MCMC</b></span>
+          <span class="dist to">\(\theta^{(1)}, \dots, \theta^{(m)}\)</span><span class="exactness">exact sum · sampled</span>
         </div>
         <p>
           Four chains start at random points. Pairs with the same count contribute identical factors, so the product only runs over the
-          17 distinct counts (§A.6.2). Switch the sampler in the top bar. At the same number of iterations Metropolis leaves R̂ well
+          17 distinct counts (§A.6.2). Switch the sampler in the top bar. At the same number of iterations Metropolis leaves \(\hat{R}\) well
           above 1.01 and ends up with tens of effective draws, where HMC has hundreds. That holds even per unit of work, although each
           Metropolis step is about ten times cheaper.
         </p>
@@ -126,7 +131,7 @@ prior on θ     ρ ~ Uniform(0, 1)                  λ_k ~ Normal⁺(1, 100)   (
         <div class="grid-2">
           <div class="card">
             <h3>Log density along the chains</h3>
-            <p class="sub">The density the sampler moves on: log P(θ | X) on the unconstrained scale, plus the log-Jacobian of the transforms, like Stan's lp__. After warmup (shaded) the four chains should look like the same noise (Fig. 3a).</p>
+            <p class="sub">The density the sampler moves on: \(\log P(\theta \mid X)\) on the unconstrained scale, plus the log-Jacobian of the transforms, like Stan's lp__. After warmup (shaded) the four chains should look like the same noise (Fig. 3a).</p>
             <div class="plot" id="p-lp"></div>
           </div>
           <div class="card">
@@ -136,25 +141,25 @@ prior on θ     ρ ~ Uniform(0, 1)                  λ_k ~ Normal⁺(1, 100)   (
           </div>
         </div>
         <div class="takeaway">
-          <b>Compare the paper:</b> λ₀ = 0.62 [0.06, 0.98], λ₁ = 14.3 [10.8, 16.8], ρ = 0.28 [0.18, 0.43]. A connected pair
-          interacts about 14 times, an unconnected one less than once. λ₀ and ρ are negatively correlated: if more pairs are
+          <b>Compare the paper:</b> \(\lambda_0 = 0.62\) [0.06, 0.98], \(\lambda_1 = 14.3\) [10.8, 16.8], \(\rho = 0.28\) [0.18, 0.43]. A connected pair
+          interacts about 14 times, an unconnected one less than once. \(\lambda_0\) and \(\rho\) are negatively correlated: if more pairs are
           allowed to be edges, fewer low counts have to be explained by the non-edge rate.
         </div>
       </section>
 
       <!-- 4 -->
       <section id="networks">
-        <div class="sec-head"><span class="sec-num">4</span><h2>Networks from θ</h2></div>
+        <div class="sec-head"><span class="sec-num">4</span><h2>Networks from \(\theta\)</h2></div>
         <div class="refs">Eqs. (A.13)–(A.14), (2.4) · Fig. 2</div>
         <div class="transition">
-          <span class="dist">θ⁽ʳ⁾</span><span class="op"><b>condition</b></span>
-          <span class="dist">Q_ij(k, θ⁽ʳ⁾) = μ_ij(k)ν_ij(k) / Σ_k′ μ_ij(k′)ν_ij(k′)</span><span class="op"><b>draw</b> each pair</span>
-          <span class="dist to">A⁽ʳ⁾ ~ Π Q_ij</span><span class="exactness">exact given θ</span>
+          <span class="dist">\(\theta^{(r)}\)</span><span class="op"><b>condition</b></span>
+          <span class=\"dist\">\(Q_{ij}(k, \theta^{(r)}) = \mu_{ij}(k)\,\nu_{ij}(k) \big/ \sum_{k'} \mu_{ij}(k')\,\nu_{ij}(k')\)</span><span class="op"><b>draw</b> each pair</span>
+          <span class="dist to">\(A^{(r)} \sim \prod Q_{ij}\)</span><span class="exactness">exact given \(\theta\)</span>
         </div>
         <p>
-          Given θ, every pair is an independent coin with probability <span class="m">Q_ij</span>, so a whole network is drawn by
-          flipping 78 coins. Doing that once per θ draw gives samples from the joint posterior <span class="m">P(A, θ | X)</span>.
-          Averaging <span class="m">A_ij</span> over them gives each pair's posterior edge probability.
+          Given \(\theta\), every pair is an independent coin with probability <span class="m">\(Q_{ij}\)</span>, so a whole network is drawn by
+          flipping 78 coins. Doing that once per \(\theta\) draw gives samples from the joint posterior <span class="m">\(P(A, \theta \mid X)\)</span>.
+          Averaging <span class="m">\(A_{ij}\)</span> over them gives each pair's posterior edge probability.
         </p>
         <div class="section-controls"><button id="c-nets">Draw two more networks</button></div>
         <div class="grid-2">
@@ -165,7 +170,7 @@ prior on θ     ρ ~ Uniform(0, 1)                  λ_k ~ Normal⁺(1, 100)   (
           </div>
           <div class="card">
             <h3>Posterior edge probabilities</h3>
-            <p class="sub">P(A_ij ≥ 1 | X), averaged over all draws (Fig. 2b). Log colour scale. Hover for the count and the spread of Q_ij over θ.</p>
+            <p class="sub">\(P(A_{ij} \ge 1 \mid X)\), averaged over all draws (Fig. 2b). Log colour scale. Hover for the count and the spread of \(Q_{ij}\) over \(\theta\).</p>
             <div class="plot" id="p-Q"></div>
           </div>
         </div>
@@ -182,14 +187,14 @@ prior on θ     ρ ~ Uniform(0, 1)                  λ_k ~ Normal⁺(1, 100)   (
         <div class="sec-head"><span class="sec-num">5</span><h2>Is it a good fit?</h2></div>
         <div class="refs">§3.1.2 · Eq. (3.4) · Fig. 4 · the authors' tutorial, cells 66 and 70</div>
         <div class="transition">
-          <span class="dist">(A⁽ʳ⁾, θ⁽ʳ⁾)</span><span class="op"><b>simulate</b></span>
-          <span class="dist">X̃ ~ P(X̃ | A⁽ʳ⁾, θ⁽ʳ⁾)</span><span class="op"><b>compare</b></span>
-          <span class="dist to">p = P(D(X̃; θ) &gt; D(X; θ))</span><span class="exactness">posterior-predictive check</span>
+          <span class="dist">\((A^{(r)}, \theta^{(r)})\)</span><span class="op"><b>simulate</b></span>
+          <span class="dist">\(\tilde{X} \sim P(\tilde{X} \mid A^{(r)}, \theta^{(r)})\)</span><span class="op"><b>compare</b></span>
+          <span class="dist to">\(p = P\big(D(\tilde{X}; \theta) &gt; D(X; \theta)\big)\)</span><span class="exactness">posterior-predictive check</span>
         </div>
         <p>
           A converged sampler says nothing about whether the model is right. For each of 500 posterior draws, generate a fake count matrix.
-          Then compare the discrepancy <span class="m">D = Σ X_ij log(X_ij / ⟨X̃_ij⟩)</span> of the fake data with that of the real data,
-          both measured against the model's expected counts <span class="m">⟨X̃_ij⟩ = Σ_k Q_ij(k) λ_k</span>.
+          Then compare the discrepancy <span class="m">\(D = \sum X_{ij} \log\big(X_{ij} / \langle \tilde{X}_{ij} \rangle\big)\)</span> of the fake data with that of the real data,
+          both measured against the model's expected counts <span class="m">\(\langle \tilde{X}_{ij} \rangle = \sum_k Q_{ij}(k)\, \lambda_k\)</span>.
         </p>
         <div id="t-fit"></div>
         <div class="grid-2">
@@ -205,7 +210,7 @@ prior on θ     ρ ~ Uniform(0, 1)                  λ_k ~ Normal⁺(1, 100)   (
           </div>
         </div>
         <div class="takeaway">
-          <b>With two edge types the fit is so-so</b> (the paper finds p = 0.136). The predicted counts sit in two bands, near 0 and
+          <b>With two edge types the fit is so-so</b> (the paper finds \(p = 0.136\)). The predicted counts sit in two bands, near 0 and
           near 14, while the real ones sit in three groups: around 0, around 5 and around 25. Switch to 3 edge types in the top bar.
         </div>
       </section>
@@ -215,12 +220,12 @@ prior on θ     ρ ~ Uniform(0, 1)                  λ_k ~ Normal⁺(1, 100)   (
         <div class="sec-head"><span class="sec-num">6</span><h2>Weak and strong ties</h2></div>
         <div class="refs">§3.1.3 · Eqs. (3.5)–(3.6) · Fig. 5</div>
         <div class="transition">
-          <span class="dist">A_ij ∈ {0, 1, 2}</span><span class="op"><b>same recipe</b></span>
-          <span class="dist to">λ₀ &lt; λ₁ &lt; λ₂, ρ on the simplex</span><span class="exactness">one more rate, one more weight</span>
+          <span class="dist">\(A_{ij} \in \{0, 1, 2\}\)</span><span class="op"><b>same recipe</b></span>
+          <span class="dist to">\(\lambda_0 &lt; \lambda_1 &lt; \lambda_2\), \(\rho\) on the simplex</span><span class="exactness">one more rate, one more weight</span>
         </div>
         <p>
           Nothing in the method assumes edges are binary. Add a third type with its own rate, keep the rates ordered (the symmetry
-          now has 3! = 6 relabellings to break), and let <span class="m">(ρ₀, ρ₁, ρ₂)</span> be any probability vector. Everything else is
+          now has \(3! = 6\) relabellings to break), and let <span class="m">\((\rho_0, \rho_1, \rho_2)\)</span> be any probability vector. Everything else is
           unchanged. This section always shows both models, whatever the top bar says.
         </p>
         <div id="t-types"></div>
@@ -238,7 +243,7 @@ prior on θ     ρ ~ Uniform(0, 1)                  λ_k ~ Normal⁺(1, 100)   (
         </div>
         <div class="takeaway">
           <b>The data have three groups: two tight subgroups (9–10, 11–13) and a larger group mixing weak and strong ties.</b>
-          The paper gets p = 0.722. The one pair the model can't classify is 1–2, seen 12 times, right between the weak (≈5) and strong (≈22) rates.
+          The paper gets \(p = 0.722\). The one pair the model can't classify is 1–2, seen 12 times, right between the weak (≈5) and strong (≈22) rates.
           Hover it in the matrix above after switching models.
         </div>
       </section>
@@ -248,29 +253,29 @@ prior on θ     ρ ~ Uniform(0, 1)                  λ_k ~ Normal⁺(1, 100)   (
         <div class="sec-head"><span class="sec-num">7</span><h2>Full Bayes vs. EM</h2></div>
         <div class="refs">§3.2 ("semi-Bayesian"), §A.3 · compare <a class="inline" href="../../../week-3/code/newman-viz/">Newman 2018</a></div>
         <div class="transition">
-          <span class="dist">EM: Q_ij(θ̂)</span><span class="op"><b>vs.</b></span>
-          <span class="dist to">full Bayes: ∫ Q_ij(θ) P(θ | X) dθ</span><span class="exactness">same Q, different θ</span>
+          <span class="dist">EM: \(Q_{ij}(\hat{\theta})\)</span><span class="op"><b>vs.</b></span>
+          <span class="dist to">full Bayes: \(\int Q_{ij}(\theta)\, P(\theta \mid X)\, d\theta\)</span><span class="exactness">same \(Q\), different \(\theta\)</span>
         </div>
         <p>
-          Last week's EM computes the same <span class="m">Q_ij</span> at one point estimate θ̂. Full Bayes averages it over the posterior of θ.
-          On 78 pairs with few parameters the per-pair answers agree closely. The difference shows where θ is uncertain: pairs whose count sits
+          Last week's EM computes the same <span class="m">\(Q_{ij}\)</span> at one point estimate \(\hat{\theta}\). Full Bayes averages it over the posterior of \(\theta\).
+          On 78 pairs with few parameters the per-pair answers agree closely. The difference shows where \(\theta\) is uncertain: pairs whose count sits
           between the two rates, and totals summed over many pairs.
         </p>
         <div id="t-em"></div>
         <div class="grid-2">
           <div class="card">
             <h3>Per pair: EM's Q vs. the posterior average</h3>
-            <p class="sub">Each dot is a count value (all pairs with that count share it). The whiskers are the 90% range of Q over θ draws. EM gives only the dot's x.</p>
+            <p class="sub">Each dot is a count value (all pairs with that count share it). The whiskers are the 90% range of \(Q\) over \(\theta\) draws. EM gives only the dot's x.</p>
             <div class="plot" id="p-emq"></div>
           </div>
           <div class="card">
             <h3>In total: how many edges?</h3>
-            <p class="sub">Edges per sampled network, with θ fixed at θ̂ (EM) and with θ averaged over its posterior (full Bayes).</p>
+            <p class="sub">Edges per sampled network, with \(\theta\) fixed at \(\hat{\theta}\) (EM) and with \(\theta\) averaged over its posterior (full Bayes).</p>
             <div class="plot" id="p-emm"></div>
           </div>
         </div>
         <div class="takeaway">
-          <b>Full Bayes costs little extra here and buys three things:</b> uncertainty about θ carried into every answer, a model check that
+          <b>Full Bayes costs little extra here and buys three things:</b> uncertainty about \(\theta\) carried into every answer, a model check that
           uses it, and no hand-derived M-step. The last is why swapping in three edge types took one line. For AddHealth the model
           has two rates per student, over a thousand parameters, and the p-value near 1 hints at overfitting. That is where the paper's
           suggested beta hyperpriors on the rates would come in.

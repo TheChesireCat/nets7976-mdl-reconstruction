@@ -2,7 +2,12 @@
 
 import { C, el, frame, line, label, fmt } from "../../../week-3/code/viz-common/charts.js";
 
-export const CHAIN = [C.g1, C.g2, C.edge, C.neutral];
+// Chain colours, refilled in place on "themechange" (after charts.js has re-read C), so
+// importers can keep indexing CHAIN[k] and get the current theme's colours.
+export const CHAIN = [];
+const readChain = () => CHAIN.splice(0, CHAIN.length, C.g1, C.g2, C.edge, C.neutral);
+readChain();
+window.addEventListener("themechange", readChain);
 
 // A group clipped to the plot area of a frame
 export function clipped(f) {

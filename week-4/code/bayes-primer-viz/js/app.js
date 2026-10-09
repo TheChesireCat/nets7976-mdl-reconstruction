@@ -1,7 +1,7 @@
 import * as M from "./model.js";
 import { acf, checkGradient } from "../../viz-common/mcmc.js";
 import {
-  C, el, frame, line, area, dot, label, refLine, legend, tiles, showTip, hideTip, modelRamp, fmt,
+  C, el, frame, line, area, dot, label, refLine, legend, tiles, showTip, hideTip, modelRamp, isLight, fmt,
 } from "../../../../week-3/code/viz-common/charts.js";
 import { CHAIN, clipped, band, bar, cross, traceChart, flowMap, samplerClient } from "../../viz-common/charts4.js";
 
@@ -24,7 +24,8 @@ const S = { seed: 1, mcSeed: 1, symSeed: 1, K: 2, toy: null, toy6: null, lap: nu
 // Small drawing helpers
 // ---------------------------------------------------------------------------
 
-// Posterior surface as a raster behind the axes: brightness is linear in log density over 10 nats
+// Posterior surface as a raster behind the axes: colour strength is linear in log density over 10 nats.
+// The light ramp runs to dark violet, so it stops sooner there to keep the ink-coloured paths readable.
 function densityImage(f, logp, xd, yd, res = 84) {
   const cv = document.createElement("canvas");
   cv.width = res; cv.height = res;
@@ -39,9 +40,10 @@ function densityImage(f, logp, xd, yd, res = 84) {
       vals[r * res + c] = v;
       if (v > mx) mx = v;
     }
+  const top = isLight() ? 0.6 : 0.85;
   for (let k = 0; k < vals.length; k++) {
     const t = Number.isFinite(vals[k]) ? Math.max(0, 1 + (vals[k] - mx) / 10) : 0;
-    const col = modelRamp(0.85 * t);
+    const col = modelRamp(top * t);
     img.data.set([col[0], col[1], col[2], 255], 4 * k);
   }
   ctx.putImageData(img, 0, 0);

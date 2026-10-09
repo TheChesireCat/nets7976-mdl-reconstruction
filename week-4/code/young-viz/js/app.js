@@ -1,6 +1,6 @@
 import * as M from "./model.js";
 import {
-  C, el, frame, line, dot, label, refLine, legend, tiles, showTip, hideTip, heatmap, rampLegend, edgeRamp, ramp, fmt,
+  C, el, frame, line, dot, label, refLine, legend, tiles, showTip, hideTip, heatmap, rampLegend, edgeRamp, themedRamp, fmt,
 } from "../../../../week-3/code/viz-common/charts.js";
 import { CHAIN, clipped, bar, traceChart, flowMap, samplerClient } from "../../viz-common/charts4.js";
 
@@ -115,7 +115,11 @@ function renderMap() {
 // 1. Data
 // ---------------------------------------------------------------------------
 
-const greyRamp = ramp(["#1a1a19", "#3a3a37", "#6b6a64", "#a3a29a", "#e6e5dc"]);
+// Counts in grey: surface (never seen together) to strong ink, in each theme
+const greyRamp = themedRamp(
+  ["#1a1a19", "#3a3a37", "#6b6a64", "#a3a29a", "#e6e5dc"],
+  ["#fcfcfb", "#dddcd5", "#aeada6", "#6b6a64", "#2c2c2a"],
+);
 const ORDER = Array.from({ length: 13 }, (_, i) => i + 1); // dolphins numbered 1..13 as in the paper
 
 function renderData() {

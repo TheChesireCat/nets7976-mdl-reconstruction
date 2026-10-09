@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Not found · NETS 7976</title>
+  <script>
+    // GitHub Pages serves this page for any missing path. Short links (/mdl, /dolphins, ...)
+    // are redirected here, since Pages has no redirect config. Works at the domain root
+    // or under the /<repo>/ project path.
+    const SHORT = {
+      martin: "week-3/code/martin-viz/",
+      newman: "week-3/code/newman-viz/",
+      primer: "week-4/code/bayes-primer-viz/",
+      dolphins: "week-4/code/young-viz/",
+      mdl: "week-5/code/peixoto-viz/",
+    };
+    const parts = location.pathname.replace(/\/+$/, "").split("/");
+    const target = SHORT[parts.pop()];
+    if (target) location.replace(parts.join("/") + "/" + target + location.search + location.hash);
+  </script>
+  <script src="/nets7976-mdl-reconstruction/week-3/code/viz-common/site.js"></script>
+  <link rel="stylesheet" href="/nets7976-mdl-reconstruction/week-3/code/viz-common/styles.css" />
+</head>
+<body>
+  <main class="content" style="margin: 0 auto; padding-top: 72px;">
+    <h1>Page not found</h1>
+    <p class="lede"><a class="inline" href="/nets7976-mdl-reconstruction/" style="color: var(--model);">Back to the walkthroughs</a></p>
+  </main>
+</body>
+</html>

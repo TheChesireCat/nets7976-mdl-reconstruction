@@ -1,27 +1,52 @@
-/* Dark, flat, quiet. Palette from the dataviz reference instance (dark steps),
-   validated on #1a1a19: blue, orange, aqua, violet all pass. */
+/* Flat and quiet, in light and dark. Palette from the dataviz reference instance: each mode
+   is its own validated step of the same hues (light on #fcfcfb, dark on #1a1a19), not a flip.
+   Light is the base; dark applies under the OS setting unless the page is stamped
+   data-theme="light", and always under data-theme="dark" (set by site.js's toggle). */
 :root {
-  color-scheme: dark;
-  --page: #0d0d0d;
-  --surface-1: #1a1a19;
-  --surface-2: #222221;
-  --border: rgba(255, 255, 255, 0.1);
-  --text-primary: #ffffff;
-  --text-secondary: #c3c2b7;
-  --text-muted: #898781;
-  --grid: #2c2c2a;
-  --axis: #383835;
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface-1: #fcfcfb;
+  --surface-2: #f3f2ee;
+  --surface-hover: #eae9e4;
+  --tooltip: #ffffff;
+  --shadow: rgba(11, 11, 11, 0.12);
+  --border: rgba(11, 11, 11, 0.1);
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #77756f;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --on-accent: #ffffff;
+  --warn: #9a6700;
 
-  --g1: #3987e5;      /* group A */
-  --g2: #d95926;      /* group B */
-  --edge: #199e70;    /* true edge / edge probability */
+  --g1: #2a78d6;      /* group A */
+  --g2: #eb6834;      /* group B */
+  --edge: #1baf7a;    /* true edge / edge probability */
   --nonedge: #898781; /* non-edge */
-  --model: #9085e9;   /* what the method computes */
-  --neutral: #c3c2b7; /* the quantity we cannot see directly */
+  --model: #4a3aa7;   /* what the method computes */
+  --neutral: #52514e; /* the quantity we cannot see directly */
 
   --radius: 12px;
   --font: system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface-1: #1a1a19; --surface-2: #222221; --surface-hover: #2a2a28;
+    --tooltip: #262624; --shadow: rgba(0, 0, 0, 0.45); --border: rgba(255, 255, 255, 0.1);
+    --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --on-accent: #0d0d0d; --warn: #fab219;
+    --g1: #3987e5; --g2: #d95926; --edge: #199e70; --nonedge: #898781; --model: #9085e9; --neutral: #c3c2b7;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface-1: #1a1a19; --surface-2: #222221; --surface-hover: #2a2a28;
+  --tooltip: #262624; --shadow: rgba(0, 0, 0, 0.45); --border: rgba(255, 255, 255, 0.1);
+  --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --on-accent: #0d0d0d; --warn: #fab219;
+  --g1: #3987e5; --g2: #d95926; --edge: #199e70; --nonedge: #898781; --model: #9085e9; --neutral: #c3c2b7;
 }
 
 * { box-sizing: border-box; }
@@ -44,9 +69,9 @@ nav.side {
 .brand-sub { color: var(--text-muted); font-size: 12px; margin-bottom: 10px; }
 .switch {
   display: inline-block; margin-bottom: 22px; font-size: 12px; color: var(--model); text-decoration: none;
-  padding: 4px 10px; border: 1px solid rgba(144, 133, 233, 0.4); border-radius: 99px;
+  padding: 4px 10px; border: 1px solid color-mix(in srgb, var(--model) 40%, transparent); border-radius: 99px;
 }
-.switch:hover { background: rgba(144, 133, 233, 0.1); }
+.switch:hover { background: color-mix(in srgb, var(--model) 10%, transparent); }
 nav.side ol { list-style: none; margin: 0; padding: 0; counter-reset: s -1; }
 nav.side li a {
   display: flex; gap: 10px; align-items: baseline;
@@ -65,7 +90,7 @@ main { min-width: 0; }
 .controls {
   position: sticky; top: 0; z-index: 10;
   display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center;
-  padding: 12px 40px; background: rgba(13, 13, 13, 0.88);
+  padding: 12px 40px; background: color-mix(in srgb, var(--page) 88%, transparent);
   backdrop-filter: blur(10px); border-bottom: 1px solid var(--border);
 }
 .content { max-width: 1120px; padding: 0 40px 120px; }
@@ -80,12 +105,12 @@ button {
   background: var(--surface-2); border: 1px solid var(--border);
   border-radius: 8px; padding: 6px 12px; cursor: pointer;
 }
-button:hover { background: #2a2a28; }
-button.primary { background: var(--model); border-color: transparent; color: #0d0d0d; }
+button:hover { background: var(--surface-hover); }
+button.primary { background: var(--model); border-color: transparent; color: var(--on-accent); }
 button.primary:hover { filter: brightness(1.08); }
 button:disabled { opacity: 0.4; cursor: default; }
 .status { font-size: 12px; color: var(--text-muted); margin-left: auto; }
-.status.warn { color: #fab219; }
+.status.warn { color: var(--warn); }
 
 /* ---------- hero ---------- */
 header.hero { padding: 64px 0 28px; max-width: 760px; }
@@ -101,12 +126,15 @@ h2 { color: var(--text-primary); font-size: 24px; font-weight: 600; margin: 0; l
 .refs { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; }
 p { max-width: 720px; margin: 0 0 14px; }
 p strong, li strong { color: var(--text-primary); font-weight: 600; }
-.m { font-family: var(--mono); font-size: 13.5px; color: var(--text-primary); white-space: nowrap; }
+/* math is TeX, typeset by MathJax (site.js): \( ... \) inline, \[ ... \] in .eq blocks */
+.m { color: var(--text-primary); white-space: nowrap; }
 .eq {
-  font-family: var(--mono); font-size: 13.5px; color: var(--text-primary);
+  color: var(--text-primary);
   background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
-  padding: 12px 16px; margin: 6px 0 18px; overflow-x: auto; white-space: pre; max-width: 760px;
+  padding: 12px 16px; margin: 6px 0 18px; overflow-x: auto; max-width: 760px;
 }
+.eq mjx-container[display="true"] { margin: 0 !important; }
+mjx-container { color: inherit; text-transform: none; letter-spacing: normal; } /* inside uppercased labels */
 
 /* the transition card: from -> operation -> to */
 .transition {
@@ -115,10 +143,10 @@ p strong, li strong { color: var(--text-primary); font-weight: 600; }
   background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius);
 }
 .dist {
-  font-family: var(--mono); font-size: 13px; color: var(--text-primary);
+  font-size: 13px; color: var(--text-primary);
   padding: 5px 10px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border);
 }
-.dist.to { border-color: rgba(144, 133, 233, 0.55); }
+.dist.to { border-color: color-mix(in srgb, var(--model) 55%, transparent); }
 .op { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
 .op::before, .op::after { content: ""; width: 18px; height: 1px; background: var(--axis); }
 .op b { color: var(--model); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px; }
@@ -143,7 +171,7 @@ p strong, li strong { color: var(--text-primary); font-weight: 600; }
 
 .takeaway {
   margin: 18px 0 0; padding: 14px 16px; max-width: 900px;
-  border-left: 2px solid var(--model); background: rgba(144, 133, 233, 0.06);
+  border-left: 2px solid var(--model); background: color-mix(in srgb, var(--model) 6%, transparent);
   border-radius: 0 10px 10px 0; font-size: 14px;
 }
 .takeaway b { color: var(--text-primary); }
@@ -177,8 +205,8 @@ svg.chart { display: block; overflow: visible; }
 
 .tooltip {
   position: fixed; left: 0; top: 0; z-index: 100; pointer-events: none; opacity: 0;
-  background: #262624; border: 1px solid var(--border); border-radius: 8px;
-  padding: 8px 10px; font-size: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  background: var(--tooltip); border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 10px; font-size: 12px; box-shadow: 0 8px 24px var(--shadow);
   transition: opacity 0.08s; min-width: 120px;
 }
 .tt-title { color: var(--text-muted); font-size: 11px; margin-bottom: 4px; }
@@ -211,8 +239,15 @@ table.recipe { border-collapse: collapse; width: 100%; font-size: 13px; }
 .recipe td:first-child { color: var(--text-primary); font-weight: 600; white-space: nowrap; }
 .recipe .m { white-space: normal; }
 .pill { font-size: 11px; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--border); white-space: nowrap; }
-.pill.exact { color: var(--edge); border-color: rgba(25, 158, 112, 0.5); }
-.pill.approx { color: var(--g2); border-color: rgba(217, 89, 38, 0.5); }
+.pill.exact { color: var(--edge); border-color: color-mix(in srgb, var(--edge) 50%, transparent); }
+.pill.approx { color: var(--g2); border-color: color-mix(in srgb, var(--g2) 50%, transparent); }
+
+/* light/dark toggle, added by site.js: in the sticky controls bar, or top-right on pages without one */
+.theme-toggle { display: inline-flex; align-items: center; gap: 6px; }
+.theme-toggle svg { width: 14px; height: 14px; }
+.theme-toggle.floating { position: fixed; top: 16px; right: 16px; z-index: 20; }
+.controls .theme-toggle { margin-left: auto; }
+.controls .status ~ .theme-toggle { margin-left: 0; }
 
 @media (max-width: 1000px) {
   .shell { grid-template-columns: 1fr; }

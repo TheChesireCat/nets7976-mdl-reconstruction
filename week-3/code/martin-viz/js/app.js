@@ -6,6 +6,7 @@ import {
 
 const $ = (id) => document.getElementById(id);
 const clear = (id) => { const e = $(id); e.replaceChildren(); return e; };
+const sup = (k) => String(k).replace(/\d/g, (c) => "⁰¹²³⁴⁵⁶⁷⁸⁹"[c]);
 const grid = (lo, hi, k) => Array.from({ length: k }, (_, i) => lo + ((hi - lo) * i) / (k - 1));
 
 // ---------------------------------------------------------------------------
@@ -200,10 +201,11 @@ function renderModel() {
       const col = modelRamp(Math.min(1, w / 0.45));
       const cx = x0 + s * cs, cy = y0 + r * cs;
       const rect = el("rect", { x: cx + 1, y: cy + 1, width: cs - 2, height: cs - 2, rx: 6, fill: `rgb(${col.join(",")})` }, svg);
+      // ink follows the cell's lightness, not the page theme (the light-mode ramp ends dark)
       const light = col[0] * 0.3 + col[1] * 0.59 + col[2] * 0.11 > 140;
       const a = el("text", { x: cx + cs / 2, y: cy + cs / 2 - 2, "text-anchor": "middle", fill: light ? "#0d0d0d" : "#fff", "font-size": 18, "font-weight": 600 }, svg);
       a.textContent = `ω = ${w.toFixed(2)}`;
-      const b = el("text", { x: cx + cs / 2, y: cy + cs / 2 + 18, "text-anchor": "middle", fill: light ? "#262624" : C.ink2, "font-size": 11.5 }, svg);
+      const b = el("text", { x: cx + cs / 2, y: cy + cs / 2 + 18, "text-anchor": "middle", fill: light ? "#262624" : "#e6e5dc", "font-size": 11.5 }, svg);
       b.textContent = `observed ${obs.toFixed(3)}`;
       rect.addEventListener("pointermove", (ev) => showTip(ev, [
         { value: w.toFixed(3), label: "ω (model)" }, { value: obs.toFixed(3), label: "edge density in sample" },
@@ -613,7 +615,7 @@ function renderEBvsFB(ebSame) {
 function renderBP() {
   const d = S.data, fit = S.fit, n = d.n;
   $("bp-n").textContent = n;
-  $("bp-states").textContent = `2^${n} ≈ 10^${Math.floor(n * Math.log10(2))}`;
+  $("bp-states").textContent = `2${sup(n)} ≈ 10${sup(Math.floor(n * Math.log10(2)))}`;
   const acc = M.accuracy(fit.marg, d.g);
   const [a, b] = S.flip ? [1, 0] : [0, 1];
   tiles(clear("t-bp"), [

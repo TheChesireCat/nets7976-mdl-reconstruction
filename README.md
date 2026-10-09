@@ -3,6 +3,9 @@
 Code written for a directed study (Northeastern, Fall 2026) on the minimum description length
 principle, network reconstruction from noisy data, and message-passing inference.
 
+Live site (GitHub Pages): <https://thechesirecat.github.io/nets7976-mdl-reconstruction/>.
+Short links: `/martin`, `/newman`, `/primer`, `/dolphins`, `/mdl`.
+
 ## Contents
 
 | Path | What it is |
@@ -48,3 +51,14 @@ Add `?test` to the primer's URL to log finite-difference checks of every gradien
 
 The dolphin counts in `week-4/code/young-viz/data/dolphins.json` come from the authors' repository,
 [jg-you/noisy-networks-measurements](https://github.com/jg-you/noisy-networks-measurements) (MIT license).
+
+## Publishing
+
+The site is served by GitHub Pages straight from the root of `main` (Settings → Pages → Deploy from a
+branch → `main` / `/ (root)`); there is no build step. `.nojekyll` stops Pages from running Jekyll, and
+`404.html` redirects the short links. All links between pages are relative, so the site works both at
+the project path and when served locally.
+
+Every page loads `week-3/code/viz-common/site.js`, which adds the light/dark toggle (following the OS
+setting until the reader picks one) and loads MathJax. Write math as TeX: `\( ... \)` inline and
+`\[ ... \]` displayed.

@@ -11,7 +11,7 @@ a.inline:hover { text-decoration: underline; }
 .seg button + button { border-left: 1px solid var(--border); }
 .seg button.on { background: var(--surface-2); color: var(--text-primary); box-shadow: inset 0 -2px 0 var(--model); }
 
-.tile.bad .tile-value { color: #fab219; }
+.tile.bad .tile-value { color: var(--warn); }
 .tile.good .tile-value { color: var(--edge); }
 .card .tiles { margin: 6px 0 8px; }
 .card .tile { min-width: 96px; padding: 7px 10px; }
