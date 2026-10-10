@@ -2,6 +2,7 @@
 // Prerequisites from front matter; the Markdown body (Intuition, Formal statement, Worked example);
 // then the generated "Used in the course" backlinks and "Going further" external references.
 // A stub has only the lede, prerequisites, backlinks and a "to be written" note.
+import { siteHeader, siteFooter } from "./shell.js";
 import { esc, head, rootFrom, pvLink, prereqText } from "./parts.js";
 import { backlinks } from "../_config/backlinks.js";
 import { registry, prereqRef } from "../_config/pages.js";
@@ -33,7 +34,8 @@ ${data.further.map((r) => `          <li>${pvLink(r, esc(r.replace(/^wiki:/, "")
     : "";
   return `${head(data, root)}
 <body>
-  <main class="page concept-page">
+${siteHeader(root)}
+  <main id="main" class="page concept-page">
     <article class="c-article">
       <header class="c-head">
         <p class="c-kind">Concept page${data.stub ? ", stub" : ""}</p>
@@ -49,6 +51,7 @@ ${data.stub ? `      <p class="c-stub">This page is a stub: its intuition, forma
       </section>${further}
     </article>
   </main>
+${siteFooter()}
 </body>
 </html>
 `;

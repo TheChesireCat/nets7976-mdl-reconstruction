@@ -14,6 +14,25 @@ prerequisites:
   - { ref: "wiki:Bayesian inference", label: "prior, likelihood and posterior", where: "§1 on" }
   - { ref: "wiki:Beta distribution", where: "§1" }
   - { ref: "wiki:Poisson distribution", where: "§3 on" }
+layout: article.11ty.js
+shortcut: { text: "Comfortable with Bayes' rule and Monte Carlo? Start at §3, the toy problem.", to: "#toy" }
+route:
+  intro: >-
+    Each section does one thing to a probability distribution. The first three write the model down and use
+    it directly; the rest are what you do when you can't.
+  groups:
+    - title: The model and its posterior
+      steps:
+        - { id: grid, step: "multiply, normalize", verb: "Multiply the prior by the likelihood and normalize", math: '\(p(\theta) \to p(\theta \mid y)\)', tag: { kind: exact, text: exact } }
+        - { id: mc, step: "draw, average", verb: "Average over draws", math: '\(\theta^{(1)}, \dots, \theta^{(M)} \to \mathbb{E}[f(\theta) \mid y]\)', tag: { kind: approx, text: 'error \(\propto 1/\sqrt{M}\)' } }
+        - { id: toy, step: "add a hidden label", verb: "Add a hidden label to every count", math: '\(z_i \to x_i \mid z_i\)', tag: { kind: model, text: the model } }
+    - title: 'When you can''t draw from \(p(\theta \mid x)\) directly'
+      steps:
+        - { id: mcmc, step: "walk a chain", verb: "Walk a Markov chain", math: '\(\to\) correlated draws', tag: { kind: approx, text: exact in the limit } }
+        - { id: marg, step: 'sum out \(z\)', verb: "Sum out the label", math: '\(\sum_z p(x, z \mid \theta) \to p(x \mid \theta)\)', tag: { kind: exact, text: exact } }
+        - { id: symmetry, step: "break the symmetry", verb: "Break the symmetry", math: '\(\lambda_1 > \lambda_0\)', tag: { kind: model, text: a constraint } }
+        - { id: ppc, step: "check the model", verb: "Check the model", math: '\(\tilde x\) against \(x\)', tag: { kind: check, text: a check } }
+        - { id: bridge, step: "from counts to networks", verb: "From counts to networks" }
 ---
 <!doctype html>
 <html lang="en">
@@ -26,23 +45,7 @@ prerequisites:
   <link rel="stylesheet" href="../viz-common/week4.css" />
 </head>
 <body>
-<div class="shell">
-  <nav class="side" aria-label="Sections">
-    <div class="brand">A Bayesian workflow primer</div>
-    <div class="brand-sub">After Carpenter, <em>Getting Started with Bayesian Statistics</em></div>
-    <a class="switch" href="../young-viz/">Young et al. 2020 →</a>
-    <ol>
-      <li><a href="#map">The map</a></li>
-      <li><a href="#grid">Bayes on a grid</a></li>
-      <li><a href="#mc">Monte Carlo</a></li>
-      <li><a href="#toy">The toy problem</a></li>
-      <li><a href="#mcmc">Metropolis vs. HMC</a></li>
-      <li><a href="#marg">Summing out a discrete unknown</a></li>
-      <li><a href="#symmetry">Symmetry and label switching</a></li>
-      <li><a href="#ppc">Does the model fit?</a></li>
-      <li><a href="#bridge">From counts to networks</a></li>
-    </ol>
-  </nav>
+<div class="shell shell-1col">
 
   <main>
     <div class="controls" id="controls">
@@ -57,37 +60,16 @@ prerequisites:
     </div>
 
     <div class="content">
-      <header class="hero">
-        <div class="eyebrow">Week 4 · Network reconstruction from noisy data II</div>
-        <h1>The whole Bayesian workflow, on something small</h1>
-        <p class="lede">
-          Young, Cantwell and Newman fit a model, sample its posterior with Stan, check the sampler and then check the model.
-          Each step is standard, but in the paper they arrive all at once. This page takes them one at a time, first on
-          Laplace's birth counts and then on a pile of counts drawn from two Poissons. That second model is the paper's dolphin
-          model with the network taken away, so by the end the paper only adds one idea.
-        </p>
-      </header>
+      <!-- article-header -->
 
       <!-- 0 -->
-      <section id="map">
-        <div class="sec-head"><span class="sec-num">0</span><h2>The map</h2></div>
-        <div class="refs">Click a box to jump to its section.</div>
-        <p>
-          <strong>Top row:</strong> what you write down, the model. <strong>Bottom row:</strong> what you do with it. Every arrow is
-          one operation on a probability distribution, and each section below is one arrow.
-        </p>
-        <div class="card map-card"><div class="plot" id="p-map"></div></div>
-      </section>
+      <!-- route -->
 
       <!-- 1 -->
       <section id="grid">
         <div class="sec-head"><span class="sec-num">1</span><h2>Bayes on a grid</h2></div>
         <div class="refs">Carpenter §5 · Laplace's live births, Paris 1745–1770</div>
-        <div class="transition">
-          <span class="dist">\(p(\theta)\)</span><span class="op"><b>multiply</b> by \(p(y \mid \theta)\)</span>
-          <span class="dist">\(p(\theta)\, p(y \mid \theta)\)</span><span class="op"><b>normalize</b></span>
-          <span class="dist to">\(p(\theta \mid y)\)</span><span class="exactness">exact (conjugate) · and on a grid</span>
-        </div>
+        <!-- strip -->
         <p>
           Laplace asked whether a birth is more likely to be a boy. Let <span class="m">\(\theta\)</span> be that probability. The data are
           <span class="m">\(y\)</span> boys out of <span class="m">\(n\)</span> births, so the likelihood is binomial. With a
@@ -129,10 +111,7 @@ prerequisites:
       <section id="mc">
         <div class="sec-head"><span class="sec-num">2</span><h2>Monte Carlo: answers from draws</h2></div>
         <div class="refs">Carpenter §3.3, §5.8–5.9</div>
-        <div class="transition">
-          <span class="dist">\(p(\theta \mid y)\)</span><span class="op"><b>draw</b> \(\theta^{(1)}, \dots, \theta^{(M)}\)</span>
-          <span class="dist to">\(\mathbb{E}[f(\theta) \mid y] \approx \tfrac{1}{M} \sum_m f(\theta^{(m)})\)</span><span class="exactness">error \(\propto 1/\sqrt{M}\)</span>
-        </div>
+        <!-- strip -->
         <p>
           Every posterior summary is an expectation: the mean is <span class="m">\(\mathbb{E}[\theta]\)</span>, and a probability like
           <span class="m">\(P(\theta \le \tfrac12)\)</span> is <span class="m">\(\mathbb{E}[\mathbf{1}(\theta \le \tfrac12)]\)</span>. Given independent draws from the posterior, you
@@ -167,11 +146,7 @@ prerequisites:
       <section id="toy">
         <div class="sec-head"><span class="sec-num">3</span><h2>The toy problem: friends and strangers</h2></div>
         <div class="refs">The dolphin model with the network taken away · Young et al. §3.1</div>
-        <div class="transition">
-          <span class="dist">\(z_i \sim \Bernoulli(\rho)\)</span><span class="op"><b>then</b></span>
-          <span class="dist">\(x_i \sim \Poisson(\lambda_{z_i})\)</span><span class="op"><b>observe</b> only \(x\)</span>
-          <span class="dist to">infer \(\lambda_0, \lambda_1, \rho\) and every \(z_i\)</span><span class="exactness">the rest of the page</span>
-        </div>
+        <!-- strip -->
         <p>
           You have <span class="m">\(N\)</span> counts, each one how often a pair of animals was seen together. A pair is either
           <strong>strangers</strong>, who meet by chance about <span class="m">\(\lambda_0\)</span> times, or <strong>friends</strong>, who meet
@@ -204,10 +179,7 @@ prerequisites:
       <section id="mcmc">
         <div class="sec-head"><span class="sec-num">4</span><h2>When you can't draw directly: Metropolis vs. HMC</h2></div>
         <div class="refs">Carpenter §1.2, §3.4, §6 · Young et al. §3.1.2, Fig. 3</div>
-        <div class="transition">
-          <span class="dist">\(p(\theta \mid x)\) up to a constant</span><span class="op"><b>Markov chain</b></span>
-          <span class="dist to">correlated draws \(\theta^{(1)}, \theta^{(2)}, \dots\)</span><span class="exactness">exact in the limit · check it</span>
-        </div>
+        <!-- strip -->
         <p>
           To make the posterior visible, this section holds \(\rho\) at its true value (\(z\) is summed out, as in §3), so the posterior of the
           §3 counts is a 2-D surface over
@@ -321,12 +293,7 @@ prerequisites:
       <section id="marg">
         <div class="sec-head"><span class="sec-num">5</span><h2>Summing out a discrete unknown</h2></div>
         <div class="refs">Carpenter §11 · Young et al. Eqs. (A.12)–(A.14)</div>
-        <div class="transition">
-          <span class="dist">\(p(\lambda, \rho, z \mid x)\)</span><span class="op"><b>sum over z</b></span>
-          <span class="dist">\(p(\lambda, \rho \mid x)\)</span><span class="op"><b>HMC</b></span>
-          <span class="dist">draws of \((\lambda, \rho)\)</span><span class="op"><b>condition</b></span>
-          <span class="dist to">\(Q_i = P(z_i = 1 \mid x_i, \lambda, \rho)\)</span><span class="exactness">exact sum · MCMC</span>
-        </div>
+        <!-- strip -->
         <p>
           Now \(\rho\) is unknown too, and so is each count's label <span class="m">\(z_i\)</span> (which Poisson it came from). HMC needs a
           gradient, so it cannot move a discrete <span class="m">\(z\)</span>. Stan doesn't allow discrete parameters at all. The fix
@@ -367,11 +334,7 @@ prerequisites:
       <section id="symmetry">
         <div class="sec-head"><span class="sec-num">6</span><h2>Symmetry and label switching</h2></div>
         <div class="refs">Carpenter §13.2 (identifiability) · Young et al. §3.1.2 ("we have imposed \(\lambda_1 &gt; \lambda_0\)") and §3.2 (\(\beta &lt; \tfrac12 &lt; \alpha\))</div>
-        <div class="transition">
-          <span class="dist">\((\lambda_0, \lambda_1, \rho)\)</span><span class="op"><b>relabel</b></span>
-          <span class="dist">\((\lambda_1, \lambda_0, 1 - \rho)\)</span><span class="op"><b>same likelihood</b></span>
-          <span class="dist to">two identical posterior modes</span><span class="exactness">break it with a constraint</span>
-        </div>
+        <!-- strip -->
         <p>
           Swap the names of the two components: call the high one "0" and the low one "1", and replace \(\rho\) with \(1 - \rho\). Every term
           <span class="m">\(\rho \Poisson(x \mid \lambda_1) + (1 - \rho) \Poisson(x \mid \lambda_0)\)</span> is unchanged, so the data can't tell the two labellings
@@ -412,11 +375,7 @@ prerequisites:
       <section id="ppc">
         <div class="sec-head"><span class="sec-num">7</span><h2>Does the model fit? Posterior-predictive checks</h2></div>
         <div class="refs">Carpenter §9.5 · Young et al. §3.1.2, Eq. (3.4), Figs. 4–6 · Gelman, Meng &amp; Stern (1996)</div>
-        <div class="transition">
-          <span class="dist">draws of \(\theta\)</span><span class="op"><b>simulate</b></span>
-          <span class="dist">\(\tilde X \sim p(\tilde X \mid \theta)\)</span><span class="op"><b>compare</b> with the real \(X\)</span>
-          <span class="dist to">\(D(\tilde X; \theta)\) vs. \(D(X; \theta)\) → \(p\)-value</span><span class="exactness">model check</span>
-        </div>
+        <!-- strip -->
         <p>
           A well-mixed sampler only means you have computed the posterior of <em>your</em> model correctly. It says nothing about
           whether the model describes the data. To check that, use the fitted model to generate fake data sets, one per posterior draw, and see
@@ -470,7 +429,7 @@ prerequisites:
       <!-- 8 -->
       <section id="bridge">
         <div class="sec-head"><span class="sec-num">8</span><h2>From counts to networks</h2></div>
-        <div class="refs">Continue with the dolphins →</div>
+        <!-- strip -->
         <p>Replace "count \(i\)" with "pair of dolphins \((i, j)\)" and "label \(z\)" with "edge \(A_{ij}\)", and this page is the paper's §3.1.</p>
         <div class="card">
           <table class="recipe">
@@ -490,9 +449,10 @@ prerequisites:
         <div class="takeaway">
           <b>The only thing the network adds is meaning.</b> The mathematics is the same mixture. What changes is that a sample of the
           \(z\)'s is now a sample of a <em>network</em>, so you can compute any network property and get its full posterior.
-          <a class="inline" href="../young-viz/">Open the dolphin page →</a>
         </div>
       </section>
+      <!-- references -->
+      <!-- pager -->
     </div>
   </main>
 </div>

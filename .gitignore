@@ -24,6 +24,7 @@ __pycache__/
 !/_config/
 !/.github/
 !/404.11ty.js
+!/index.11ty.js
 !/previews.11ty.js
 !/_includes/
 !/concepts/

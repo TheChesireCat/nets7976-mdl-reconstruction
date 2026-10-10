@@ -44,7 +44,7 @@
       label();
     });
     window.addEventListener("themechange", label);
-    const bar = document.getElementById("controls");
+    const bar = document.querySelector(".site-header .sh-tools") ?? document.getElementById("controls");
     if (bar) bar.appendChild(btn);
     else { btn.classList.add("floating"); document.body.appendChild(btn); }
   });

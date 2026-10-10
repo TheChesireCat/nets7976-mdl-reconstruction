@@ -1,5 +1,6 @@
 // /concepts/: every concept page, alphabetically, with its lede and how many articles use it
 // (docs/redesign-spec.md §8). Generated; stubs are listed like the others.
+import { siteHeader, siteFooter } from "../_includes/shell.js";
 import { esc, head, rootFrom, pvLink } from "../_includes/parts.js";
 import { backlinks } from "../_config/backlinks.js";
 
@@ -18,7 +19,8 @@ export function render(data) {
   });
   return `${head(data, root)}
 <body>
-  <main class="page concepts-index">
+${siteHeader(root)}
+  <main id="main" class="page concepts-index">
     <header class="c-head">
       <h1>Concepts</h1>
       <p class="lede">The ideas the course leans on, one page per family of methods. Everything else links to Wikipedia.</p>
@@ -27,6 +29,7 @@ export function render(data) {
 ${rows.join("\n")}
     </ol>
   </main>
+${siteFooter()}
 </body>
 </html>
 `;

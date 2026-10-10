@@ -3,7 +3,7 @@ import { acf, checkGradient } from "../../viz-common/mcmc.js";
 import {
   C, el, frame, line, area, dot, label, refLine, legend, tiles, showTip, hideTip, modelRamp, isLight, fmt,
 } from "../../../../week-3/code/viz-common/charts.js";
-import { CHAIN, clipped, band, bar, cross, traceChart, flowMap, samplerClient } from "../../viz-common/charts4.js";
+import { CHAIN, clipped, band, bar, cross, traceChart, samplerClient } from "../../viz-common/charts4.js";
 
 const $ = (id) => document.getElementById(id);
 const clear = (id) => { const e = $(id); e.replaceChildren(); return e; };
@@ -100,30 +100,6 @@ function starts(rng, fit, K, spread = 4, N = 4) {
     for (let k = 1; k < K; k++) if (lam[k] <= lam[k - 1]) lam[k] = lam[k - 1] + 0.1;
     return { lam, pi: fit.pi.map(() => 1 / K) };
   });
-}
-
-// ---------------------------------------------------------------------------
-// 0. Map
-// ---------------------------------------------------------------------------
-
-const MAP = {
-  top: [
-    { d: "p(θ)", o: "prior", e: "what you believe first", sec: "grid" },
-    { d: "p(x | z, θ)", o: "data model", e: "how data arise", sec: "grid" },
-    { d: "p(θ | x)", o: "Bayes' rule", e: "§1 · grid or formula", sec: "grid" },
-    { d: "θ⁽¹⁾, …, θ⁽ᴹ⁾", o: "draw", e: "§2 · Monte Carlo", sec: "mc" },
-  ],
-  bottom: [
-    { d: "Σ_z p(x, z | θ)", o: "sum out z", e: "§5 · exact per item", sec: "marg" },
-    { d: "chains", o: "MCMC", e: "§4 · Metropolis / HMC", sec: "mcmc" },
-    { d: "R̂, ESS", o: "check sampler", e: "§4, §6", sec: "mcmc" },
-    { d: "λ₁ > λ₀", o: "break symmetry", e: "§6 · identify labels", sec: "symmetry" },
-    { d: "X̃ vs. X", o: "check model", e: "§7 · p-value", sec: "ppc" },
-  ],
-};
-
-function renderMap() {
-  flowMap(clear("p-map"), { ...MAP, topLabel: "The model and its posterior", bottomLabel: "Computing and checking it", join: "when you can't draw from p(θ | x) directly" });
 }
 
 // ---------------------------------------------------------------------------
@@ -660,16 +636,10 @@ $("c-K").addEventListener("click", (e) => {
   runPPC();
 });
 
-const links = [...document.querySelectorAll("nav.side a[href^='#']")];
-const obs = new IntersectionObserver((entries) => {
-  for (const e of entries) if (e.isIntersecting) links.forEach((a) => a.classList.toggle("active", a.getAttribute("href") === `#${e.target.id}`));
-}, { rootMargin: "-40% 0px -55% 0px" });
-document.querySelectorAll("section").forEach((s) => obs.observe(s));
-
 let rz = null;
 window.addEventListener("resize", () => {
   clearTimeout(rz);
-  rz = setTimeout(() => { S.surfaceImg = null; renderMap(); renderGrid(); renderToy(); renderMCMC(); renderCorr(); renderMarg(); renderSym(); renderPPC(); }, 200);
+  rz = setTimeout(() => { S.surfaceImg = null; renderGrid(); renderToy(); renderMCMC(); renderCorr(); renderMarg(); renderSym(); renderPPC(); }, 200);
 });
 
 // ?test: check every target's gradient against finite differences
@@ -683,7 +653,6 @@ if (new URLSearchParams(location.search).has("test")) {
 
 syncToy();
 syncMCMC();
-renderMap();
 renderGrid();
 renderCorr();
 recomputeToy();
