@@ -1,1 +1,76 @@
-{}
+{
+  "carpenter2023": {
+    "id": "carpenter2023",
+    "type": "webpage",
+    "title": "Getting started with Bayesian statistics using Stan and Python",
+    "author": [{ "family": "Carpenter", "given": "Bob" }],
+    "issued": { "date-parts": [[2023]] },
+    "URL": "https://bob-carpenter.github.io/stan-getting-started/stan-getting-started.html",
+    "note": "The primer's main reading: the Bayesian workflow from a grid to Stan, one step at a time."
+  },
+  "gelman1996": {
+    "id": "gelman1996",
+    "type": "article-journal",
+    "title": "Posterior predictive assessment of model fitness via realized discrepancies",
+    "author": [{ "family": "Gelman", "given": "Andrew" }, { "family": "Meng", "given": "Xiao-Li" }, { "family": "Stern", "given": "Hal" }],
+    "issued": { "date-parts": [[1996]] },
+    "container-title": "Statistica Sinica",
+    "volume": "6",
+    "issue": "4",
+    "page": "733–807",
+    "URL": "https://www3.stat.sinica.edu.tw/statistica/j6n4/j6n41/j6n41.htm",
+    "note": "Defines the realized-discrepancy p-value behind the primer's posterior-predictive check."
+  },
+  "martin2016": {
+    "id": "martin2016",
+    "type": "article-journal",
+    "title": "Structural inference for uncertain networks",
+    "author": [{ "family": "Martin", "given": "Travis" }, { "family": "Ball", "given": "Brian" }, { "family": "Newman", "given": "M. E. J." }],
+    "issued": { "date-parts": [[2016]] },
+    "container-title": "Physical Review E",
+    "volume": "93",
+    "issue": "1",
+    "page": "012306",
+    "DOI": "10.1103/PhysRevE.93.012306",
+    "note": "Week 3's first reading: a block model plus calibrated noise, with the network summed out."
+  },
+  "newman2018": {
+    "id": "newman2018",
+    "type": "article-journal",
+    "title": "Network structure from rich but noisy data",
+    "author": [{ "family": "Newman", "given": "M. E. J." }],
+    "issued": { "date-parts": [[2018]] },
+    "container-title": "Nature Physics",
+    "volume": "14",
+    "issue": "6",
+    "page": "542–545",
+    "DOI": "10.1038/s41567-018-0076-1",
+    "note": "Week 3's second reading: repeated measurements of a network, with error rates learned by EM."
+  },
+  "peixoto2025": {
+    "id": "peixoto2025",
+    "type": "article-journal",
+    "title": "Network reconstruction via the minimum description length principle",
+    "author": [{ "family": "Peixoto", "given": "Tiago P." }],
+    "issued": { "date-parts": [[2025]] },
+    "container-title": "Physical Review X",
+    "volume": "15",
+    "issue": "1",
+    "page": "011065",
+    "DOI": "10.1103/PhysRevX.15.011065",
+    "note": "Week 5's reading: an edge is kept only if writing it down costs fewer bits than it saves."
+  },
+  "young2020": {
+    "id": "young2020",
+    "type": "article-journal",
+    "title": "Bayesian inference of network structure from unreliable data",
+    "author": [{ "family": "Young", "given": "Jean-Gabriel" }, { "family": "Cantwell", "given": "George T." }, { "family": "Newman", "given": "M. E. J." }],
+    "issued": { "date-parts": [[2020]] },
+    "container-title": "Journal of Complex Networks",
+    "volume": "8",
+    "issue": "6",
+    "page": "cnaa046",
+    "DOI": "10.1093/comnet/cnaa046",
+    "note": "Week 4's reading: a posterior over the dolphin network, sampled with Stan; the primer builds up to it."
+  }
+}
