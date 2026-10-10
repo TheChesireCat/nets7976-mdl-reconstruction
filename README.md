@@ -30,23 +30,17 @@ python week-2/code/two_part_mdl.py both
 python week-3/code/eb_vs_full_bayes.py sweep
 ```
 
-The walkthroughs are plain HTML and JavaScript modules with no dependencies or build step, but
-browsers only load modules over HTTP, so serve the folder and open the pages:
+The site is built with [Eleventy](https://www.11ty.dev/) (Node 22, see `.nvmrc`). The walkthroughs stay plain
+HTML and JavaScript modules: Eleventy only reads each page's front matter and copies the figure code unchanged.
 
 ```bash
-cd week-3/code && python -m http.server 8765
+npm install
+npm start          # builds and serves the site at http://localhost:8080/nets7976-mdl-reconstruction/
+npm run build      # writes the site to _site/
 ```
 
-Then visit `http://localhost:8765/martin-viz/` and `http://localhost:8765/newman-viz/`.
+Serving the repository root directly no longer works: the pages carry front matter that only the build strips.
 
-The Week 4 pages import shared code from `week-3/`, so serve the repository root for those:
-
-```bash
-python -m http.server 8765
-```
-
-and visit `http://localhost:8765/week-4/code/bayes-primer-viz/`, `http://localhost:8765/week-4/code/young-viz/`
-and `http://localhost:8765/week-5/code/peixoto-viz/`.
 Add `?test` to the primer's URL to log finite-difference checks of every gradient.
 
 The dolphin counts in `week-4/code/young-viz/data/dolphins.json` come from the authors' repository,
@@ -54,10 +48,14 @@ The dolphin counts in `week-4/code/young-viz/data/dolphins.json` come from the a
 
 ## Publishing
 
-The site is served by GitHub Pages straight from the root of `main` (Settings → Pages → Deploy from a
-branch → `main` / `/ (root)`); there is no build step. `.nojekyll` stops Pages from running Jekyll, and
-`404.html` redirects the short links. All links between pages are relative, so the site works both at
-the project path and when served locally.
+A push to `main` runs `.github/workflows/pages.yml`, which builds the site and deploys `_site/` to GitHub Pages
+(Settings → Pages → Source: GitHub Actions). Only the site is published: the Python scripts, this README and
+the docs stay in the repository.
+
+Each page's metadata (title, short name, week, order, lede, readings, prerequisites) is YAML front matter at
+the top of its `index.html`, and the build generates `previews.json` and the short links in `404.html` from it.
+The build fails on a duplicate short name, an unknown or looping prerequisite, or a broken internal link.
+The full rules are in [`docs/redesign-spec.md`](docs/redesign-spec.md).
 
 Every page loads `week-3/code/viz-common/site.js`, which adds the light/dark toggle (following the OS
 setting until the reader picks one) and loads MathJax. Write math as TeX: `\( ... \)` inline and

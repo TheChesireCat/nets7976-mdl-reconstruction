@@ -1,4 +1,8 @@
-<!doctype html>
+// 404.html: GitHub Pages serves it for any missing path. The short-link table (/primer, /mdl, ...) is
+// generated from each page's `short:` front matter, in reading order. The rest of the page is fixed text.
+export const data = { permalink: "/404.html", eleventyExcludeFromCollections: true };
+
+const HEAD = `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -8,14 +12,8 @@
     // GitHub Pages serves this page for any missing path. Short links (/mdl, /dolphins, ...)
     // are redirected here, since Pages has no redirect config. Works at the domain root
     // or under the /<repo>/ project path.
-    const SHORT = {
-      martin: "week-3/code/martin-viz/",
-      newman: "week-3/code/newman-viz/",
-      primer: "week-4/code/bayes-primer-viz/",
-      dolphins: "week-4/code/young-viz/",
-      mdl: "week-5/code/peixoto-viz/",
-    };
-    const parts = location.pathname.replace(/\/+$/, "").split("/");
+`;
+const TAIL = `    const parts = location.pathname.replace(/\\/+$/, "").split("/");
     const target = SHORT[parts.pop()];
     if (target) location.replace(parts.join("/") + "/" + target + location.search + location.hash);
   </script>
@@ -29,3 +27,12 @@
   </main>
 </body>
 </html>
+`;
+
+export function render({ collections }) {
+  const rows = collections.pages
+    .filter((p) => p.data.short)
+    .map((p) => `      ${p.data.short}: "${p.url.slice(1)}",\n`)
+    .join("");
+  return HEAD + "    const SHORT = {\n" + rows + "    };\n" + TAIL;
+}

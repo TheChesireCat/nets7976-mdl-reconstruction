@@ -15,3 +15,15 @@
 __pycache__/
 *.pyc
 .DS_Store
+
+# Build (Eleventy): sources tracked, output and dependencies not.
+!/package.json
+!/package-lock.json
+!/.nvmrc
+!/eleventy.config.js
+!/_config/
+!/.github/
+!/404.11ty.js
+!/previews.11ty.js
+node_modules/
+_site/
