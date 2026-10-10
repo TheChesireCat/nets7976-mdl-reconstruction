@@ -1,14 +1,20 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bayesian workflow primer · Week 4</title>
-  <script src="../../../week-3/code/viz-common/site.js"></script>
-  <link rel="stylesheet" href="../../../week-3/code/viz-common/styles.css" />
-  <link rel="stylesheet" href="../viz-common/week4.css" />
-</head>
-<body>
+---
+layout: article.11ty.js
+kind: article
+slug: primer
+htmlTitle: Bayesian workflow primer · Week 4
+stylesheets: [week-4/code/viz-common/week4.css]
+week: 4
+reading: Network reconstruction from noisy data II
+title: The whole Bayesian workflow, on something small
+lede: >-
+  Young, Cantwell and Newman fit a model, sample its posterior with Stan, check the sampler and then check the model.
+  Each step is standard, but in the paper they arrive all at once. This page takes them one at a time, first on
+  Laplace's birth counts and then on a pile of counts drawn from two Poissons. That second model is the paper's dolphin
+  model with the network taken away, so by the end the paper only adds one idea.
+prerequisites:
+  - markov-chain-monte-carlo
+---
 <div class="shell">
   <nav class="side" aria-label="Sections">
     <div class="brand">A Bayesian workflow primer</div>
@@ -40,16 +46,7 @@
     </div>
 
     <div class="content">
-      <header class="hero">
-        <div class="eyebrow">Week 4 · Network reconstruction from noisy data II</div>
-        <h1>The whole Bayesian workflow, on something small</h1>
-        <p class="lede">
-          Young, Cantwell and Newman fit a model, sample its posterior with Stan, check the sampler and then check the model.
-          Each step is standard, but in the paper they arrive all at once. This page takes them one at a time, first on
-          Laplace's birth counts and then on a pile of counts drawn from two Poissons. That second model is the paper's dolphin
-          model with the network taken away, so by the end the paper only adds one idea.
-        </p>
-      </header>
+      <!-- article-header -->
 
       <!-- 0 -->
       <section id="map">
@@ -480,5 +477,3 @@
   </main>
 </div>
 <script type="module" src="js/app.js"></script>
-</body>
-</html>

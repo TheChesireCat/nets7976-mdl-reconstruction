@@ -1,0 +1,46 @@
+# Deploy the Eleventy build (_site) to GitHub Pages.
+# NOT ENABLED: this file lives in spike/. To enable, move it to .github/workflows/pages.yml
+# and set Settings -> Pages -> Source to "GitHub Actions" (today it is "Deploy from a branch", main, /).
+name: Deploy to Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx @11ty/eleventy
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+          # .nojekyll is a dotfile and is dropped by default; Actions deploys never run Jekyll,
+          # so it is not needed. Set include-hidden-files: true if a dotfile ever must ship.
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

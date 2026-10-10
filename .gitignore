@@ -7,6 +7,16 @@
 !/README.md
 !/CONTEXT.md
 !/index.html
+# Eleventy build (spike/eleventy). node_modules/ and _site/ stay ignored by /*.
+!/package.json
+!/package-lock.json
+!/eleventy.config.js
+!/previews.11ty.js
+!/_config/
+!/_includes/
+!/concepts/
+!/spike/
+!/SPIKE.md
 !/week-*/
 /week-*/*
 !/week-*/code/
