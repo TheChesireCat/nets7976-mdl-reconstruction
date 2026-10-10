@@ -1,4 +1,4 @@
-# Whitelist: only each week's code/ folder, plus the site's landing page and GitHub Pages files, is tracked.
+# Whitelist: only each week's code/ folder, plus the landing page, GitHub Pages files, the glossary and docs/, is tracked.
 # Readings, slides, the syllabus and local tool settings stay out of the repo.
 /*
 !/.gitignore
@@ -6,6 +6,7 @@
 !/404.html
 !/README.md
 !/CONTEXT.md
+!/docs/
 !/index.html
 !/week-*/
 /week-*/*
