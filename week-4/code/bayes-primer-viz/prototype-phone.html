@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PROTOTYPE · Phone layout</title>
+  <!-- PROTOTYPE (throwaway) for the wayfinder ticket "Prototype the phone layout for articles".
+       The decided anatomy (variant A), route and strip, plus primer §8's wide equation and table.
+       Three phone strategies, switchable with ?variant=A|B|C. They differ only below 720px wide. -->
+  <script src="../../../week-3/code/viz-common/site.js"></script>
+  <link rel="stylesheet" href="../../../week-3/code/viz-common/styles.css" />
+  <link rel="stylesheet" href="prototype-anatomy.css?v=4" />
+  <link rel="stylesheet" href="prototype-route.css?v=2" />
+  <link rel="stylesheet" href="prototype-phone.css?v=2" />
+</head>
+<body class="v-A">
+<article class="a-article">
+  <header class="a-title">
+    <h1>The whole Bayesian workflow, on something small</h1>
+    <p class="a-lede">
+      Young, Cantwell and Newman fit a model, sample its posterior with Stan, check the sampler and then check the model.
+      Each step is standard, but in the paper they arrive all at once. This page takes them one at a time, first on
+      Laplace's birth counts and then on a pile of counts drawn from two Poissons.
+    </p>
+    <dl class="a-byline">
+      <div><dt>Week 4</dt><dd>Network reconstruction from noisy data II</dd></div>
+      <div><dt>Reading</dt><dd>Carpenter, <em>Getting Started with Bayesian Statistics</em>, and Young, Cantwell and Newman (2020)</dd></div>
+      <div><dt>Before you start</dt><dd><a class="ext" href="https://en.wikipedia.org/wiki/Bayes%27_theorem">Bayes' rule</a>, the <a class="ext" href="https://en.wikipedia.org/wiki/Binomial_distribution">binomial</a> and <a class="ext" href="https://en.wikipedia.org/wiki/Beta_distribution">Beta</a> distributions</dd></div>
+    </dl>
+  </header>
+
+  <nav class="rtA" id="route" aria-label="The route through this page">
+  <h2 class="rt-h">The route through this page</h2>
+  <p class="rt-intro">Each section does one thing to a probability distribution. The first three write the model down and use it directly; the rest are what you do when you can't.</p>
+  <h3 class="rt-group">The model and its posterior</h3>
+  <ol class="rt-steps">
+    <li><a href="#grid"><span class="rt-n">1</span><span class="rt-what"><b>Multiply the prior by the likelihood and normalize</b> \(p(\theta) \to p(\theta \mid y)\)</span><span class="tag exact">exact</span></a></li>
+    <li><a href="index.html#mc"><span class="rt-n">2</span><span class="rt-what"><b>Average over draws</b> \(\theta^{(1)}, \dots, \theta^{(M)} \to \mathbb{E}[f(\theta) \mid y]\)</span><span class="tag approx">error \(\propto 1/\sqrt{M}\)</span></a></li>
+    <li><a href="#toy"><span class="rt-n">3</span><span class="rt-what"><b>Add a hidden label to every count</b> \(z_i \to x_i \mid z_i\)</span><span class="tag model">the model</span></a></li>
+  </ol>
+  <h3 class="rt-group">When you can't draw from \(p(\theta \mid x)\) directly</h3>
+  <ol class="rt-steps" start="4">
+    <li><a href="#mcmc"><span class="rt-n">4</span><span class="rt-what"><b>Walk a Markov chain</b> \(\to\) correlated draws</span><span class="tag approx">exact in the limit</span></a></li>
+    <li><a href="index.html#marg"><span class="rt-n">5</span><span class="rt-what"><b>Sum out the label</b> \(\sum_z p(x, z \mid \theta) \to p(x \mid \theta)\)</span><span class="tag exact">exact</span></a></li>
+    <li><a href="index.html#symmetry"><span class="rt-n">6</span><span class="rt-what"><b>Break the symmetry</b> \(\lambda_1 &gt; \lambda_0\)</span><span class="tag model">a constraint</span></a></li>
+    <li><a href="index.html#ppc"><span class="rt-n">7</span><span class="rt-what"><b>Check the model</b> \(\tilde x\) against \(x\)</span><span class="tag check">a check</span></a></li>
+    <li><a href="index.html#bridge"><span class="rt-n">8</span><span class="rt-what"><b>From counts to networks</b></span></a></li>
+  </ol>
+</nav>
+
+  <section id="grid">
+    <h2><span class="kicker">1</span>Bayes on a grid</h2>
+    <div class="rt-strip" aria-label="Where this section sits on the route"><span class="rt-s now"><span class="rt-n">§1</span> multiply, normalize \(\;p(\theta) \to p(\theta \mid y)\) <span class="tag exact">exact</span></span><span class="rt-s next"><span class="rt-n">§2</span> draw, average</span><a class="rt-back" href="#route">The route</a></div>
+    <p>
+      Laplace asked whether a birth is more likely to be a boy.<span class="sn-mark"></span><span class="sidenote">Carpenter §5. The counts are Laplace's live births in Paris, 1745 to 1770.</span>
+      Let \(\theta\) be that probability. The data are \(y\) boys out of \(n\) births, so the likelihood is
+      <a class="ext" href="https://en.wikipedia.org/wiki/Binomial_distribution">binomial</a>. With a \(\Beta(a, b)\) prior the posterior is again a Beta,<span class="sn-mark"></span><span class="sidenote">This is what <a class="ext" href="https://en.wikipedia.org/wiki/Conjugate_prior">conjugate</a> means: prior and posterior come from the same family.</span>
+      which gives an exact answer to check everything else against:
+    </p>
+    <div class="eq eq-wide">\[ p(\theta \mid y) \;\propto\; \underbrace{\theta^{a-1} (1-\theta)^{b-1}}_{\text{prior}} \cdot \underbrace{\theta^{y} (1-\theta)^{n-y}}_{\text{likelihood}} \;=\; \Beta(a + y,\ b + n - y) \]</div>
+    <div class="eq-narrow">
+      <div class="eqn-row"><div class="eqn-m">\(\displaystyle p(\theta \mid y) \;\propto\; \theta^{a-1} (1-\theta)^{b-1} \cdot \theta^{y} (1-\theta)^{n-y}\)</div><div class="eqn-note">prior × likelihood</div></div>
+      <div class="eqn-row"><div class="eqn-m">\(\displaystyle \phantom{p(\theta \mid y)} = \Beta(a + y,\ b + n - y)\)</div><div class="eqn-note">again a Beta</div></div>
+    </div>
+    <p>
+      With one parameter you can also skip the algebra: evaluate prior × likelihood on a fine grid of \(\theta\) values and divide by
+      the sum. Figure 1 does both, and the two agree.
+    </p>
+    <figure class="a-wide">
+      <div class="a-figctl">
+        <label class="ctl">prior a <input type="range" id="c-a" min="0.5" max="50" step="0.5" value="1" /><output data-o="a"></output></label>
+        <label class="ctl">prior b <input type="range" id="c-b" min="0.5" max="50" step="0.5" value="1" /><output data-o="b"></output></label>
+        <label class="ctl">share of Laplace's data <input type="range" id="c-frac" min="-4" max="0" step="0.25" value="-3" /><output data-o="frac"></output></label>
+      </div>
+      <div class="a-panels">
+        <div class="plot" id="p-grid"></div>
+        <div class="plot" id="p-summary"></div>
+      </div>
+      <figcaption>
+        <b>Prior × likelihood → posterior.</b> Left: the dots are the grid approximation and the line is the exact Beta; the likelihood is
+        scaled to fit the same axis. Right: the posterior, with its central 95% interval shaded. Raise the prior sliders, then slide the
+        data share to 100%. Now: <span class="r" data-r="births"></span> births, posterior mean <span class="r" data-r="mean"></span>
+        (sd <span class="r" data-r="sd"></span>), 95% interval <span class="r" data-r="ci"></span>,
+        P(θ ≤ ½) = <span class="r" data-r="phalf"></span>.
+      </figcaption>
+    </figure>
+    <p class="a-key">
+      <b>Data overwhelm the prior.</b> With 0.01% of the data, about 20 births, the prior sliders move the posterior a lot. With all of it,
+      no reasonable prior matters: \(P(\theta \le \tfrac12)\) drops to about \(10^{-42}\). That is Laplace's answer.
+    </p>
+    <p>
+      The grid works because there is only one parameter. With \(d\) parameters a grid needs \(400^d\) points, which is why the rest
+      of the page uses samples.
+    </p>
+  </section>
+
+  <section id="toy">
+    <h2><span class="kicker">3</span>The toy problem: friends and strangers</h2>
+    <div class="rt-strip" aria-label="Where this section sits on the route"><span class="rt-s prev"><span class="rt-n">§2</span> draw, average</span><span class="rt-s now"><span class="rt-n">§3</span> add a hidden label \(\;z_i \to x_i \mid z_i\) <span class="tag model">the model</span></span><span class="rt-s next"><span class="rt-n">§4</span> walk a chain</span><a class="rt-back" href="#route">The route</a></div>
+    <p class="omitted">§2, Monte Carlo, is left out of the prototype.</p>
+    <p>
+      You have \(N\) counts, each one how often a pair of animals was seen together.<span class="sn-mark"></span><span class="sidenote">This is the dolphin model of Young et al. §3.1 with the network taken away.</span>
+      A pair is either <strong>strangers</strong>, who meet by chance about \(\lambda_0\) times, or <strong>friends</strong>, who meet
+      about \(\lambda_1\) times. A share \(\rho\) of the pairs are friends. The hidden label \(z_i\) says which kind pair \(i\) is:
+    </p>
+    <div class="eq eq-wide">\[ \begin{aligned}
+  z_i &amp;\sim \Bernoulli(\rho) &amp;&amp; \text{is pair } i \text{ friends? (hidden)} \\
+  x_i \mid z_i &amp;\sim \Poisson(\lambda_{z_i}) &amp;&amp; \text{how often they were seen together}
+\end{aligned} \]</div>
+    <div class="eq-narrow">
+      <div class="eqn-row"><div class="eqn-m">\(z_i \sim \Bernoulli(\rho)\)</div><div class="eqn-note">is pair \(i\) friends? Hidden.</div></div>
+      <div class="eqn-row"><div class="eqn-m">\(x_i \mid z_i \sim \Poisson(\lambda_{z_i})\)</div><div class="eqn-note">how often they were seen together. Observed.</div></div>
+    </div>
+    <p>
+      From the counts alone, find \(\theta = (\lambda_0, \lambda_1, \rho)\) and, for each pair, \(P(z_i = 1 \mid x)\). The strip above
+      Figure 2 sets the true values used to simulate the counts. The samplers never see them, so you can check what they recover.
+    </p>
+    <figure class="a-wide">
+      <div class="a-figctl">
+        <div class="toy-strip" role="group" aria-label="Toy counts, shared by sections 3 to 7">
+          <span class="strip-label">Toy counts</span>
+          <label class="ctl">λ₀ <input type="range" data-k="l0" min="0.2" max="5" step="0.1" /><output></output></label>
+          <label class="ctl">λ₁ <input type="range" data-k="l1" min="2" max="30" step="0.5" /><output></output></label>
+          <label class="ctl">ρ <input type="range" data-k="rho" min="0.05" max="0.8" step="0.01" /><output></output></label>
+          <label class="ctl">N <input type="range" data-k="N" min="20" max="500" step="10" /><output></output></label>
+          <button type="button" data-act="seed">New sample</button>
+          <button type="button" data-act="dolphin">Dolphin-like</button>
+        </div>
+      </div>
+      <div class="plot" id="p-toy"></div>
+      <figcaption>
+        <b>What you observe.</b> The \(N\) counts, with no labels: which come from friends is exactly what you can't see. The same strip
+        appears above every figure in §3 to §7 and they all move together. Now: <span class="r" data-r="toy-status"></span>.
+      </figcaption>
+    </figure>
+    <p class="a-key">
+      <b>\(z\) is discrete, so the samplers never touch it.</b> HMC needs a gradient, so §4 and §5 use the likelihood with \(z\)
+      <a href="#" title="Concept page: marginalization (stub)">summed out</a> and recover the \(z\)'s afterwards.
+    </p>
+  </section>
+
+  <section id="mcmc">
+    <h2><span class="kicker">4</span>When you can't draw directly: Metropolis vs. HMC</h2>
+    <div class="rt-strip" aria-label="Where this section sits on the route"><span class="rt-s prev"><span class="rt-n">§3</span> add a hidden label</span><span class="rt-s now"><span class="rt-n">§4</span> walk a chain \(\;\to\) correlated draws <span class="tag approx">exact in the limit</span></span><span class="rt-s next"><span class="rt-n">§5</span> sum out \(z\)</span><a class="rt-back" href="#route">The route</a></div>
+    <p>
+      This section holds \(\rho\) at its true value, so the posterior of the §3 counts is a surface over \((\lambda_0, \lambda_1)\) that you
+      can see. There is no formula for drawing from it, but a
+      <a href="#" title="Concept page: Markov chain Monte Carlo (stub)">Markov chain</a> can walk it so that its positions, in the long run,
+      are draws from it.
+    </p>
+    <figure class="a-wide">
+      <div class="a-figctl">
+        <div class="toy-strip" role="group" aria-label="Toy counts, shared by sections 3 to 7">
+          <span class="strip-label">Toy counts</span>
+          <label class="ctl">λ₀ <input type="range" data-k="l0" min="0.2" max="5" step="0.1" /><output></output></label>
+          <label class="ctl">λ₁ <input type="range" data-k="l1" min="2" max="30" step="0.5" /><output></output></label>
+          <label class="ctl">ρ <input type="range" data-k="rho" min="0.05" max="0.8" step="0.01" /><output></output></label>
+          <label class="ctl">N <input type="range" data-k="N" min="20" max="500" step="10" /><output></output></label>
+          <button type="button" data-act="seed">New sample</button>
+          <button type="button" data-act="dolphin">Dolphin-like</button>
+        </div>
+      </div>
+      <div class="placeholder">Sampler paths would go here; they aren't built in the prototype.<br />Move a slider here and the strip above Figure 2 moves with it.</div>
+      <figcaption><b>Metropolis and HMC on the same posterior.</b> Placeholder. Now: <span class="r" data-r="toy-status"></span>.</figcaption>
+    </figure>
+  </section>
+
+  <section id="bridge">
+    <h2><span class="kicker">8</span>From counts to networks</h2>
+    <div class="rt-strip" aria-label="Where this section sits on the route"><span class="rt-s prev"><span class="rt-n">§7</span> check the model</span><span class="rt-s now"><span class="rt-n">§8</span> from counts to networks</span><a class="rt-back" href="#route">The route</a></div>
+    <p class="omitted">§5 to §7 are left out of the prototype. This excerpt holds the page's widest equation and its table.</p>
+    <p>
+      The dolphin model is the toy model with pairs of animals in place of counts. Each pair \((i, j)\) has a count \(X_{ij}\) and a hidden
+      edge \(A_{ij}\), and the three pieces are:
+    </p>
+    <div class="eq eq-wide">\[ \begin{aligned}
+&\text{data model} \quad && \mu_{ij}(1) = \Poisson(X_{ij} \mid \lambda_1) \quad && \mu_{ij}(0) = \Poisson(X_{ij} \mid \lambda_0) \quad && \lambda_1 &gt; \lambda_0 \quad \text{(breaks the symmetry)} \\
+&\text{network model} \quad && \nu_{ij}(1) = \rho && \nu_{ij}(0) = 1 - \rho \\
+&\text{prior on } \theta \quad && \rho \sim \Uniform(0, 1) && \lambda_k \sim \Normal^{+}(1, 100) && \text{(the authors' code; the text says half-normal, } \sigma = 100\text{)}
+\end{aligned} \]</div>
+    <div class="eq-narrow">
+      <p class="eqn-head">Data model</p>
+      <div class="eqn-row"><div class="eqn-m">\(\mu_{ij}(1) = \Poisson(X_{ij} \mid \lambda_1)\)</div></div>
+      <div class="eqn-row"><div class="eqn-m">\(\mu_{ij}(0) = \Poisson(X_{ij} \mid \lambda_0)\)</div></div>
+      <div class="eqn-row"><div class="eqn-m">\(\lambda_1 &gt; \lambda_0\)</div><div class="eqn-note">breaks the symmetry</div></div>
+      <p class="eqn-head">Network model</p>
+      <div class="eqn-row"><div class="eqn-m">\(\nu_{ij}(1) = \rho, \quad \nu_{ij}(0) = 1 - \rho\)</div></div>
+      <p class="eqn-head">Prior on \(\theta\)</p>
+      <div class="eqn-row"><div class="eqn-m">\(\rho \sim \Uniform(0, 1)\)</div></div>
+      <div class="eqn-row"><div class="eqn-m">\(\lambda_k \sim \Normal^{+}(1, 100)\)</div><div class="eqn-note">the authors' code; the text says half-normal, \(\sigma = 100\)</div></div>
+    </div>
+    <p>Side by side, every piece of the toy has a counterpart in the paper:</p>
+    <div class="tbl">
+      <table class="recipe">
+        <thead><tr><th></th><th>This page</th><th>Young et al., dolphins</th></tr></thead>
+        <tbody>
+          <tr><td>Data</td><td>\(N\) counts \(x_i\)</td><td>interaction counts \(X_{ij}\) for 78 pairs of 13 dolphins</td></tr>
+          <tr><td>Discrete unknown</td><td>label \(z_i\): which Poisson</td><td>\(A_{ij}\): edge or not (or: none, weak, strong)</td></tr>
+          <tr><td>Data model</td><td>\(\Poisson(\lambda_z)\)</td><td>\(\mu_{ij}(A_{ij}) = \Poisson(X_{ij} \mid \lambda_A)\)</td></tr>
+          <tr><td>Prior on the unknown</td><td>\(P(z = 1) = \rho\)</td><td>network model \(\nu_{ij}(1) = \rho\)</td></tr>
+          <tr><td>Summing it out</td><td><span class="tag exact">exact</span> one two-term sum per count</td><td><span class="tag exact">exact</span> one sum per pair, Eq. (A.12)</td></tr>
+          <tr><td>Recovering it</td><td>\(Q_i\) per draw</td><td>\(Q_{ij}\) per draw, then sample whole networks, Eq. (A.13)</td></tr>
+          <tr><td>Symmetry breaking</td><td>\(\lambda_1 &gt; \lambda_0\)</td><td>\(\lambda_1 &gt; \lambda_0\) (AddHealth: \(\beta &lt; \tfrac12 &lt; \alpha\))</td></tr>
+          <tr><td>Model check</td><td>discrepancy \(p\)-value</td><td>\(p = 0.136\) with two edge types, 0.722 with three</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</article>
+<script src="js/prototype-phone.js?v=2"></script>
+<script type="module" src="js/prototype-anatomy.js"></script>
+</body>
+</html>
