@@ -1,0 +1,114 @@
+{
+  "Bayesian inference": {
+    "title": "Bayesian inference",
+    "url": "https://en.wikipedia.org/wiki/Bayesian_inference",
+    "description": "Method of statistical inference",
+    "lede": "<p><b>Bayesian inference</b> is a method of statistical inference in which Bayes' theorem is used to calculate a probability of a hypothesis, given prior evidence, and update it as more information becomes available. Fundamentally, Bayesian inference uses a prior distribution to estimate posterior probabilities. Bayesian inference is an important technique in statistics, and especially in mathematical statistics. Bayesian updating is particularly important in the dynamic analysis of a sequence of data. Bayesian inference has found application in a wide range of activities, including science, engineering, philosophy, medicine, sport, psychology, and law. In the philosophy of decision theory, Bayesian inference is closely related to subjective probability, often called \"Bayesian probability\".</p>",
+    "thumbnail": null,
+    "fetched": "2026-10-10"
+  },
+  "Beta distribution": {
+    "title": "Beta distribution",
+    "url": "https://en.wikipedia.org/wiki/Beta_distribution",
+    "description": "Probability distribution",
+    "lede": "<p>In probability theory and statistics, the <b>beta distribution</b> is a family of continuous probability distributions defined on the interval [0, 1] or in terms of two positive parameters, denoted by <i>alpha</i> (<i>α</i>) and <i>beta</i> (<i>β</i>), that appear as exponents of the variable and its complement to 1, respectively, and control the shape of the distribution.</p>",
+    "thumbnail": {
+      "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/Beta_distribution_pdf.svg/330px-Beta_distribution_pdf.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "width": 330,
+      "height": 264
+    },
+    "fetched": "2026-10-10"
+  },
+  "Identifiability": {
+    "title": "Identifiability",
+    "url": "https://en.wikipedia.org/wiki/Identifiability",
+    "description": "Statistical property which a model must satisfy to allow precise inference",
+    "lede": "<p>In statistics, <b>identifiability</b> is a property which a model must satisfy for precise inference to be possible. A model is <b>identifiable</b> if it is theoretically possible to learn the true values of this model's underlying parameters after obtaining an infinite number of observations from it. Mathematically, this is equivalent to saying that different values of the parameters must generate different probability distributions of the observable variables. Usually the model is identifiable only under certain technical restrictions, in which case the set of these requirements is called the <b>identification conditions</b>.</p>",
+    "thumbnail": null,
+    "fetched": "2026-10-10"
+  },
+  "Latent and observable variables": {
+    "title": "Latent and observable variables",
+    "url": "https://en.wikipedia.org/wiki/Latent_and_observable_variables",
+    "description": "Concept in statistics",
+    "lede": "<p>In statistics, <b>latent variables</b> are variables that can only be inferred indirectly through a mathematical model from other <b>observable variables</b> that can be directly observed or measured. Such <i>latent variable models</i> are used in many disciplines, including engineering, medicine, ecology, physics, machine learning/artificial intelligence, natural language processing, bioinformatics, chemometrics, demography, economics, management, political science, psychology and the social sciences.</p>",
+    "thumbnail": null,
+    "fetched": "2026-10-10"
+  },
+  "Marginal distribution": {
+    "title": "Marginal distribution",
+    "url": "https://en.wikipedia.org/wiki/Marginal_distribution",
+    "description": "Aspect of probability and statistics",
+    "lede": "<p>In probability theory and statistics, the <b>marginal distribution</b> of a subset of a collection of random variables is the probability distribution of the variables contained in the subset. It gives the probabilities of various values of the variables in the subset without reference to the values of the other variables. This contrasts with a conditional distribution, which gives the probabilities contingent upon the values of the other variables.</p>",
+    "thumbnail": null,
+    "fetched": "2026-10-10"
+  },
+  "Markov chain": {
+    "title": "Markov chain",
+    "url": "https://en.wikipedia.org/wiki/Markov_chain",
+    "description": "Random process independent of past history",
+    "lede": "<p>In probability theory and statistics, a <b>Markov chain</b> or <b>Markov process</b> is a stochastic process describing a sequence of possible events in which the probability of each event depends only on the state attained in the previous event. A countably infinite sequence, in which the chain moves state at discrete time steps, gives a discrete-time Markov chain (DTMC). A continuous-time process is called a continuous-time Markov chain (CTMC). Markov processes are named in honor of the Russian mathematician Andrey Markov.</p>",
+    "thumbnail": {
+      "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2b/Markovkate_01.svg/330px-Markovkate_01.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "width": 330,
+      "height": 330
+    },
+    "fetched": "2026-10-10"
+  },
+  "Markov chain Monte Carlo": {
+    "title": "Markov chain Monte Carlo",
+    "url": "https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo",
+    "description": "Calculation of complex statistical distributions",
+    "lede": "<p>In statistics, <b>Markov chain Monte Carlo</b> (<b>MCMC</b>) is a class of algorithms used to draw samples from a probability distribution. Given a probability distribution, one can construct a Markov chain whose elements' distribution approximates it, i.e. the Markov chain's equilibrium distribution matches the target distribution. The more steps that are included, the more closely the distribution of the sample matches the actual desired distribution.</p>",
+    "thumbnail": null,
+    "fetched": "2026-10-10"
+  },
+  "Mixture model": {
+    "title": "Mixture model",
+    "url": "https://en.wikipedia.org/wiki/Mixture_model",
+    "description": "Statistical concept",
+    "lede": "<p>In statistics, a <b>mixture model</b> is a probabilistic model for representing the presence of subpopulations within an overall population, without requiring that an observed data set should identify the sub-population to which an individual observation belongs. Formally a mixture model corresponds to the mixture distribution that represents the probability distribution of observations in the overall population. However, while problems associated with \"mixture distributions\" relate to deriving the properties of the overall population from those of the sub-populations, \"mixture models\" are used to make statistical inferences about the properties of the sub-populations given only observations on the pooled population, without sub-population identity information. Mixture models are used for clustering, under the name model-based clustering, and also for density estimation.</p>",
+    "thumbnail": null,
+    "fetched": "2026-10-10"
+  },
+  "Monte Carlo method": {
+    "title": "Monte Carlo method",
+    "url": "https://en.wikipedia.org/wiki/Monte_Carlo_method",
+    "description": "Probabilistic problem-solving algorithm",
+    "lede": "<p><b>Monte Carlo methods</b>, also called the <b>Monte Carlo experiments</b> or <b>Monte Carlo simulations</b>, are a broad class of computational algorithms based on repeated random sampling for obtaining numerical results, conceptualized by Polish mathematician Stanisław Ulam. The underlying concept is to use randomness to solve deterministic problems.</p>",
+    "thumbnail": {
+      "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/Approximation_d%27une_distribution_normale.gif/330px-Approximation_d%27une_distribution_normale.gif?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "width": 330,
+      "height": 248
+    },
+    "fetched": "2026-10-10"
+  },
+  "P-value": {
+    "title": "P-value",
+    "url": "https://en.wikipedia.org/wiki/P-value",
+    "description": "Function of the observed sample results",
+    "lede": "<p>In null-hypothesis significance testing, the <b><i>p</i>-value</b> is the probability of obtaining test results at least as extreme as the result actually observed, under the assumption that the null hypothesis is correct. A very small <i>p</i>-value means that such an extreme observed outcome would be very unlikely <i>under the null hypothesis</i>. Even though reporting <i>p</i>-values of statistical tests is common practice in academic publications of many quantitative fields, misinterpretation and misuse of p-values is widespread and has been a major topic in mathematics and metascience.</p>",
+    "thumbnail": null,
+    "fetched": "2026-10-10"
+  },
+  "Poisson distribution": {
+    "title": "Poisson distribution",
+    "url": "https://en.wikipedia.org/wiki/Poisson_distribution",
+    "description": "Discrete probability distribution",
+    "lede": "<p>In probability theory and statistics, the <b>Poisson distribution</b> is a discrete probability distribution that expresses the probability of a given number of events occurring in a fixed interval of time if these events occur with a known constant mean rate and independently of the time since the last event. It can also be used for the number of events in other types of intervals than time, and in dimension greater than 1 .\nThe Poisson distribution is named after French mathematician Siméon Denis Poisson. It plays an important role for discrete-stable distributions.</p>",
+    "thumbnail": {
+      "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Poisson_pmf.svg/330px-Poisson_pmf.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "width": 330,
+      "height": 255
+    },
+    "fetched": "2026-10-10"
+  },
+  "Posterior predictive distribution": {
+    "title": "Posterior predictive distribution",
+    "url": "https://en.wikipedia.org/wiki/Posterior_predictive_distribution",
+    "description": "Distribution of new data marginalized over the posterior",
+    "lede": "<p>In Bayesian statistics, the <b>posterior predictive distribution</b> is the distribution of possible unobserved values conditional on the observed values.</p>",
+    "thumbnail": null,
+    "fetched": "2026-10-10"
+  }
+}

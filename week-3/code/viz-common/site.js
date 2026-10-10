@@ -70,4 +70,15 @@
   s.src = "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js";
   s.async = true;
   document.head.appendChild(s);
+
+  // Hover previews (previews.js) load only on pages that have preview links (a.pv, set by the build).
+  const here = document.currentScript.src;
+  document.addEventListener("DOMContentLoaded", () => {
+    if (!document.querySelector("a.pv")) return;
+    const css = document.createElement("link");
+    css.rel = "stylesheet";
+    css.href = new URL("previews.css", here).href;
+    document.head.appendChild(css);
+    import(new URL("previews.js", here).href);
+  });
 })();

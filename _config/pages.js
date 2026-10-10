@@ -4,7 +4,12 @@
 //   - two pages with the same short name;
 //   - a prerequisite naming a concept page that doesn't exist;
 //   - a loop in the prerequisites.
+//   - a "wiki:" prerequisite missing from data/external.json (a stale cache entry only warns).
 // Prerequisites are concept slugs or "wiki:<Title>", given as a string or as { ref, label, where }.
+// It also fills `registry`, which the link pass (_config/links.js) reads after the collection is built.
+import { loadExternal, STALE_DAYS } from "./external.js";
+
+export const registry = { concepts: new Map(), byShort: new Map(), byUrl: new Map() };
 
 export const prereqRef = (q) => (typeof q === "string" ? q : q.ref);
 export const conceptSlug = (p) => p.data.slug ?? p.url.match(/^\/concepts\/([^/]+)\/$/)?.[1];
@@ -21,10 +26,17 @@ export function pagesCollection(api) {
   }
 
   const concepts = new Map(pages.filter((p) => p.data.kind === "concept").map((p) => [conceptSlug(p), p]));
+  const external = loadExternal();
+  const now = Date.now();
   for (const p of pages) {
     for (const q of p.data.prerequisites ?? []) {
       const ref = prereqRef(q);
-      if (ref.startsWith("wiki:")) continue; // checked against data/external.json once it exists
+      if (ref.startsWith("wiki:")) {
+        const e = external[ref.slice(5)];
+        if (!e) throw new Error(`Prerequisite "${ref}" in ${p.inputPath} is not in data/external.json (run npm run refresh-wiki)`);
+        if (now - Date.parse(e.fetched) > STALE_DAYS * 864e5) console.warn(`[11ty] data/external.json: "${ref.slice(5)}" was fetched ${e.fetched}; refresh with npm run refresh-wiki`);
+        continue;
+      }
       if (!concepts.has(ref)) {
         throw new Error(`Unknown prerequisite "${ref}" in ${p.inputPath}. Known concept pages: ${[...concepts.keys()].join(", ") || "none yet"}`);
       }
@@ -44,6 +56,10 @@ export function pagesCollection(api) {
     state.set(slug, "done");
   };
   for (const slug of concepts.keys()) visit(slug, []);
+
+  registry.concepts = concepts;
+  registry.byShort = byShort;
+  registry.byUrl = new Map(pages.map((p) => [p.url, p]));
 
   const rank = (p) => (p.data.kind === "article" ? [0, p.data.week, p.data.order ?? 0, ""] : [1, 0, 0, conceptSlug(p)]);
   return pages.sort((a, b) => {

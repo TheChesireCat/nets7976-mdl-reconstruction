@@ -2,10 +2,13 @@
   "name": "nets7976-mdl-reconstruction",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "start": "eleventy --serve",
-    "build": "eleventy"
+    "build": "eleventy",
+    "refresh-wiki": "node scripts/refresh-wiki.mjs"
   },
   "devDependencies": {
     "@11ty/eleventy": "3.1.6"

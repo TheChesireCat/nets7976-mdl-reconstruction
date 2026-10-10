@@ -1,0 +1,20 @@
+/* Generated site pages: concept pages and the concepts index (docs/redesign-spec.md §4, §8).
+   One 680px reading column, sans body, as in the article anatomy. */
+.page { max-width: 680px; margin: 0 auto; padding: 72px 16px 120px; }
+.page h1 { font-size: 34px; line-height: 1.15; letter-spacing: -0.015em; margin: 4px 0 12px; color: var(--text-primary); }
+.page h2 { font-size: 20px; margin: 40px 0 8px; color: var(--text-primary); }
+.page p, .page li { font-size: 16px; line-height: 1.65; }
+.page a { color: var(--model); }
+.page .lede { font-size: 18px; line-height: 1.6; color: var(--text-primary); margin: 0 0 14px; }
+.page .muted { color: var(--text-muted); font-size: 14px; }
+.c-kind { font-size: 13px; font-weight: 600; color: var(--model); margin: 0; }
+.c-notation, .c-needs { font-size: 14px !important; color: var(--text-secondary); margin: 0 0 8px; }
+.c-notation span, .c-needs span { color: var(--text-muted); margin-right: 6px; }
+.c-stub { margin: 28px 0 0; padding: 2px 0 2px 14px; border-left: 2px solid var(--axis); color: var(--text-muted); font-size: 15px !important; }
+.c-sec ul { padding-left: 20px; }
+.c-list { list-style: none; padding: 0; margin: 32px 0 0; border-top: 1px solid var(--border); }
+.c-list li { padding: 14px 0; border-bottom: 1px solid var(--border); }
+.c-list h2 { font-size: 18px; margin: 0 0 4px; }
+.c-list p { margin: 0 0 4px; }
+.c-list h2 a { text-decoration: none; }
+@media (max-width: 720px) { .page { padding-top: 56px; } .page h1 { font-size: 28px; } }

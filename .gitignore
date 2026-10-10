@@ -25,5 +25,9 @@ __pycache__/
 !/.github/
 !/404.11ty.js
 !/previews.11ty.js
+!/_includes/
+!/concepts/
+!/data/
+!/scripts/
 node_modules/
 _site/
