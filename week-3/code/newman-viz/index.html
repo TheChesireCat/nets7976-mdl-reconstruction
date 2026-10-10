@@ -144,7 +144,7 @@ P(A \mid \theta) &= \prod_{i&lt;j} \rho^{A_{ij}} (1-\rho)^{1-A_{ij}} && \text{(o
           uniform priors he assumes, that is the same point as the maximum of the likelihood <span class="m">\(P(E \mid \theta)\)</span>. The sum over
           all <span class="m">\(2^{\binom{n}{2}}\)</span> networks is exact here, because the pairs are independent given \(\theta\): it splits into one
           two-term sum per pair. EM climbs it by alternating the E-step (compute every <span class="m">\(Q_{ij}\)</span> at the current \(\theta\), Eq. 6)
-          and the M-step (re-estimate \(\theta\) from those <span class=\"m\">\(Q\)</span>'s, Eq. 5).
+          and the M-step (re-estimate \(\theta\) from those <span class="m">\(Q\)</span>'s, Eq. 5).
         </p>
         <div id="t-em"></div>
         <div class="card">
