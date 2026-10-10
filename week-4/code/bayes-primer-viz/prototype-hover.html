@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PROTOTYPE · Hover previews</title>
+  <!-- PROTOTYPE (throwaway) for the wayfinder ticket "Prototype the hover preview card".
+       The anatomy is variant A of prototype-anatomy.html. Three hover-preview designs, switchable with ?variant=A|B|C.
+       Dotted links go to Wikipedia, solid ones to our concept pages (stubs) or another article. -->
+  <script src="../../../week-3/code/viz-common/site.js"></script>
+  <link rel="stylesheet" href="../../../week-3/code/viz-common/styles.css" />
+  <link rel="stylesheet" href="prototype-anatomy.css?v=4" />
+  <link rel="stylesheet" href="prototype-hover.css?v=2" />
+</head>
+<body class="v-A">
+<article class="a-article">
+  <header class="a-title">
+    <h1>The whole Bayesian workflow, on something small</h1>
+    <p class="a-lede">
+      Young, Cantwell and Newman fit a model, sample its posterior with Stan, check the sampler and then check the model.
+      Each step is standard, but in the paper they arrive all at once. This page takes them one at a time, first on
+      Laplace's birth counts and then on a pile of counts drawn from two Poissons.
+    </p>
+    <dl class="a-byline">
+      <div><dt>Week 4</dt><dd>Network reconstruction from noisy data II</dd></div>
+      <div><dt>Reading</dt><dd>Carpenter, <em>Getting Started with Bayesian Statistics</em>, and Young, Cantwell and Newman (2020)</dd></div>
+      <div><dt>Before you start</dt><dd><a class="ext pv" data-pv="wiki:Bayes%27_theorem" href="https://en.wikipedia.org/wiki/Bayes%27_theorem">Bayes' rule</a>, the <a class="ext pv" data-pv="wiki:Binomial_distribution" href="https://en.wikipedia.org/wiki/Binomial_distribution">binomial</a> and <a class="ext pv" data-pv="wiki:Beta_distribution" href="https://en.wikipedia.org/wiki/Beta_distribution">Beta</a> distributions</dd></div>
+    </dl>
+  </header>
+
+  <nav class="a-toc" aria-label="Contents">
+    <b>Contents</b>
+    <ol>
+      <li><a href="#grid">Bayes on a grid</a></li>
+      <li>Monte Carlo (left out of the prototype)</li>
+      <li><a href="#toy">The toy problem</a></li>
+      <li><a href="#mcmc">Metropolis vs. HMC</a></li>
+    </ol>
+  </nav>
+
+  <section id="grid">
+    <h2><span class="kicker">1</span>Bayes on a grid</h2>
+    <aside class="a-margin"><b>In this section.</b> Start from a prior \(p(\theta)\), multiply by the likelihood \(p(y \mid \theta)\), normalize, and get the posterior \(p(\theta \mid y)\). Here the answer is exact.</aside>
+    <p>
+      Laplace asked whether a birth is more likely to be a boy.<span class="sn-mark"></span><span class="sidenote">Carpenter §5. The counts are Laplace's live births in Paris, 1745 to 1770.</span>
+      Let \(\theta\) be that probability. The data are \(y\) boys out of \(n\) births, so the likelihood is
+      <a class="ext pv" data-pv="wiki:Binomial_distribution" href="https://en.wikipedia.org/wiki/Binomial_distribution">binomial</a>. With a \(\Beta(a, b)\) prior the posterior is again a Beta,<span class="sn-mark"></span><span class="sidenote">This is what <a class="ext pv" data-pv="wiki:Conjugate_prior" href="https://en.wikipedia.org/wiki/Conjugate_prior">conjugate</a> means: prior and posterior come from the same family.</span>
+      which gives an exact answer to check everything else against:
+    </p>
+    <div class="eq">\[ p(\theta \mid y) \;\propto\; \underbrace{\theta^{a-1} (1-\theta)^{b-1}}_{\text{prior}} \cdot \underbrace{\theta^{y} (1-\theta)^{n-y}}_{\text{likelihood}} \;=\; \Beta(a + y,\ b + n - y) \]</div>
+    <p>
+      With one parameter you can also skip the algebra: evaluate prior × likelihood on a fine grid of \(\theta\) values and divide by
+      the sum. Figure 1 does both, and the two agree.
+    </p>
+    <figure class="a-wide">
+      <div class="a-figctl">
+        <label class="ctl">prior a <input type="range" id="c-a" min="0.5" max="50" step="0.5" value="1" /><output data-o="a"></output></label>
+        <label class="ctl">prior b <input type="range" id="c-b" min="0.5" max="50" step="0.5" value="1" /><output data-o="b"></output></label>
+        <label class="ctl">share of Laplace's data <input type="range" id="c-frac" min="-4" max="0" step="0.25" value="-3" /><output data-o="frac"></output></label>
+      </div>
+      <div class="a-panels">
+        <div class="plot" id="p-grid"></div>
+        <div class="plot" id="p-summary"></div>
+      </div>
+      <figcaption>
+        <b>Prior × likelihood → posterior.</b> Left: the dots are the grid approximation and the line is the exact Beta; the likelihood is
+        scaled to fit the same axis. Right: the posterior, with its central 95% interval shaded. Raise the prior sliders, then slide the
+        data share to 100%. Now: <span class="r" data-r="births"></span> births, posterior mean <span class="r" data-r="mean"></span>
+        (sd <span class="r" data-r="sd"></span>), 95% interval <span class="r" data-r="ci"></span>,
+        P(θ ≤ ½) = <span class="r" data-r="phalf"></span>.
+      </figcaption>
+    </figure>
+    <p class="a-key">
+      <b>Data overwhelm the prior.</b> With 0.01% of the data, about 20 births, the prior sliders move the posterior a lot. With all of it,
+      no reasonable prior matters: \(P(\theta \le \tfrac12)\) drops to about \(10^{-42}\). That is Laplace's answer. The <a class="pv" data-pv="article:young" href="../young-viz/">dolphin article</a> meets the same effect with far fewer data.
+    </p>
+    <p>
+      The grid works because there is only one parameter. With \(d\) parameters a grid needs \(400^d\) points, which is why the rest
+      of the page uses samples.
+    </p>
+  </section>
+
+  <section id="toy">
+    <h2><span class="kicker">3</span>The toy problem: friends and strangers</h2>
+    <p class="omitted">§2, Monte Carlo, is left out of the prototype.</p>
+    <aside class="a-margin"><b>In this section.</b> Draw a hidden label \(z_i\), then a count \(x_i\); you only see \(x\). The rest of the page infers \(\lambda_0, \lambda_1, \rho\) and every \(z_i\).</aside>
+    <p>
+      You have \(N\) counts, each one how often a pair of animals was seen together.<span class="sn-mark"></span><span class="sidenote">This is the dolphin model of <a class="pv" data-pv="article:young" href="../young-viz/">Young et al.</a> §3.1 with the network taken away.</span>
+      A pair is either <strong>strangers</strong>, who meet by chance about \(\lambda_0\) times, or <strong>friends</strong>, who meet
+      about \(\lambda_1\) times. A share \(\rho\) of the pairs are friends. The hidden label \(z_i\) says which kind pair \(i\) is:
+    </p>
+    <div class="eq">\[ \begin{aligned}
+  z_i &amp;\sim \Bernoulli(\rho) &amp;&amp; \text{is pair } i \text{ friends? (hidden)} \\
+  x_i \mid z_i &amp;\sim \Poisson(\lambda_{z_i}) &amp;&amp; \text{how often they were seen together}
+\end{aligned} \]</div>
+    <p>
+      From the counts alone, find \(\theta = (\lambda_0, \lambda_1, \rho)\) and, for each pair, \(P(z_i = 1 \mid x)\). The strip above
+      Figure 2 sets the true values used to simulate the counts. The samplers never see them, so you can check what they recover.
+    </p>
+    <figure class="a-wide">
+      <div class="a-figctl">
+        <div class="toy-strip" role="group" aria-label="Toy counts, shared by sections 3 to 7">
+          <span class="strip-label">Toy counts</span>
+          <label class="ctl">λ₀ <input type="range" data-k="l0" min="0.2" max="5" step="0.1" /><output></output></label>
+          <label class="ctl">λ₁ <input type="range" data-k="l1" min="2" max="30" step="0.5" /><output></output></label>
+          <label class="ctl">ρ <input type="range" data-k="rho" min="0.05" max="0.8" step="0.01" /><output></output></label>
+          <label class="ctl">N <input type="range" data-k="N" min="20" max="500" step="10" /><output></output></label>
+          <button type="button" data-act="seed">New sample</button>
+          <button type="button" data-act="dolphin">Dolphin-like</button>
+        </div>
+      </div>
+      <div class="plot" id="p-toy"></div>
+      <figcaption>
+        <b>What you observe.</b> The \(N\) counts, with no labels: which come from friends is exactly what you can't see. The same strip
+        appears above every figure in §3 to §7 and they all move together. Now: <span class="r" data-r="toy-status"></span>.
+      </figcaption>
+    </figure>
+    <p class="a-key">
+      <b>\(z\) is discrete, so the samplers never touch it.</b> HMC needs a gradient, so §4 and §5 use the likelihood with \(z\)
+      <a class="pv" data-pv="concept:marginalization" href="#">summed out</a> and recover the \(z\)'s afterwards. Because friends and strangers can swap names without changing the fit, the samplers also have to deal with <a class="pv" data-pv="concept:label-switching" href="#">label switching</a>.
+    </p>
+  </section>
+
+  <section id="mcmc">
+    <h2><span class="kicker">4</span>When you can't draw directly: Metropolis vs. HMC</h2>
+    <p>
+      This section holds \(\rho\) at its true value, so the posterior of the §3 counts is a surface over \((\lambda_0, \lambda_1)\) that you
+      can see. There is no formula for drawing from it, but a
+      <a class="pv" data-pv="concept:markov-chain-monte-carlo" href="#">Markov chain</a> can walk it so that its positions, in the long run,
+      are draws from it.
+    </p>
+    <figure class="a-wide">
+      <div class="a-figctl">
+        <div class="toy-strip" role="group" aria-label="Toy counts, shared by sections 3 to 7">
+          <span class="strip-label">Toy counts</span>
+          <label class="ctl">λ₀ <input type="range" data-k="l0" min="0.2" max="5" step="0.1" /><output></output></label>
+          <label class="ctl">λ₁ <input type="range" data-k="l1" min="2" max="30" step="0.5" /><output></output></label>
+          <label class="ctl">ρ <input type="range" data-k="rho" min="0.05" max="0.8" step="0.01" /><output></output></label>
+          <label class="ctl">N <input type="range" data-k="N" min="20" max="500" step="10" /><output></output></label>
+          <button type="button" data-act="seed">New sample</button>
+          <button type="button" data-act="dolphin">Dolphin-like</button>
+        </div>
+      </div>
+      <div class="placeholder">Sampler paths would go here; they aren't built in the prototype.<br />Move a slider here and the strip above Figure 2 moves with it.</div>
+      <figcaption><b>Metropolis and HMC on the same posterior.</b> Placeholder. Now: <span class="r" data-r="toy-status"></span>.</figcaption>
+    </figure>
+  </section>
+</article>
+<script type="module" src="js/prototype-anatomy.js"></script>
+<script type="module" src="js/prototype-hover.js?v=1"></script>
+</body>
+</html>

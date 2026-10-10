@@ -1,0 +1,94 @@
+/* PROTOTYPE (throwaway): hover-preview designs for prototype-hover.html. Built on prototype-anatomy.css, variant A. */
+
+:root { --wiki-link: #3366cc; }
+:root[data-theme="dark"] { --wiki-link: #88a3e8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --wiki-link: #88a3e8; } }
+
+/* ---------- shared card ---------- */
+.pv-card {
+  position: absolute; z-index: 40; left: 0; top: 0; width: 340px; max-width: calc(100vw - 16px);
+  background: var(--tooltip); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px;
+  box-shadow: 0 10px 30px var(--shadow); font-size: 14px; line-height: 1.5; text-align: left;
+  opacity: 0; transition: opacity 0.12s;
+}
+.pv-card.in { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .pv-card { transition: none; } }
+.pv-body { padding: 14px 16px 10px; }
+.pv-card h4 { margin: 0 0 6px; color: var(--text-primary); }
+.pv-card p { margin: 0 0 8px; }
+.pv-kind { font-size: 12px; color: var(--model); font-weight: 600; margin-bottom: 2px !important; }
+.pv-go { display: block; padding: 8px 16px 10px; border-top: 1px solid var(--border); font-size: 13px; font-weight: 500; text-decoration: none; }
+.pv-go::after { content: " ›"; }
+.pv-back { margin: 10px 0 0 14px; font-size: 12px; padding: 3px 9px; }
+
+/* our concept page: looks like a concept page (sans title, the lede, the equation, what it needs) */
+.pv-concept h4 { font-size: 17px; font-weight: 600; line-height: 1.3; }
+.pv-concept .pv-lede { color: var(--text-secondary); }
+.pv-eq { color: var(--text-primary); margin: 4px 0 10px; overflow-x: auto; }
+.pv-eq mjx-container[display="true"] { margin: 0 !important; }
+.pv-pre { font-size: 13px; }
+.pv-pre span, .pv-used span { color: var(--text-muted); margin-right: 4px; }
+.pv-used { font-size: 13px; border-top: 1px solid var(--border); padding-top: 8px; margin-top: 4px; }
+.pv-used ul { margin: 4px 0 0; padding-left: 18px; }
+
+/* another article: looks like an article's title block */
+.pv-article h4 { font-size: 20px; font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; }
+.pv-article .pv-lede { font-size: 14.5px; }
+.pv-reading { font-size: 12.5px; color: var(--text-muted); }
+.pv-toc { margin: 6px 0 4px; padding-left: 20px; font-size: 13px; color: var(--text-muted); }
+
+/* Wikipedia: looks a bit like Wikipedia (serif title over a hairline, its link blue, the W) */
+.pv-wiki h4 {
+  font: 400 21px/1.25 "Linux Libertine", "Georgia", "Times", serif; color: var(--text-primary);
+  padding-bottom: 4px; border-bottom: 1px solid var(--axis); margin-bottom: 4px;
+}
+.pv-desc { font-size: 12.5px; color: var(--text-muted); margin-bottom: 8px !important; }
+.pv-extract { color: var(--text-primary); font-size: 14px; }
+.pv-extract p { margin: 0; }
+.pv-extract b { font-weight: 600; }
+.pv-wiki-card .pv-go, .pv-wiki-card a:not(.pv-open) { color: var(--wiki-link); }
+.pv-thumb { float: right; width: auto; height: auto; max-width: 92px; max-height: 92px; margin: 2px 0 6px 12px; border-radius: 2px; background: #fff; }
+.pv-src { clear: both; font-size: 11.5px; color: var(--text-muted); margin: 8px 0 0 !important; display: flex; align-items: center; gap: 6px; }
+.pv-w { font: 600 13px "Linux Libertine", "Georgia", serif; color: var(--text-primary); }
+.pv-err { color: var(--text-muted); }
+:root[data-theme="dark"] .pv-extract img.mw-invert { filter: invert(1) hue-rotate(180deg); }
+
+/* ---------- B: windows ---------- */
+.pv-B .pv-card { width: 460px; border-radius: 6px; }
+.pv-bar {
+  display: flex; align-items: center; gap: 10px; padding: 6px 8px 6px 14px;
+  border-bottom: 1px solid var(--border); background: var(--surface-2); border-radius: 6px 6px 0 0; font-size: 12px; color: var(--text-muted);
+}
+.pv-bar span { flex: 1; }
+.pv-bar .pv-open { font-weight: 500; text-decoration: none; }
+.pv-x { padding: 1px 8px; font-size: 15px; line-height: 1.2; background: transparent; border: 0; }
+.pv-B .pv-body { max-height: min(60vh, 520px); overflow-y: auto; }
+.pv-B .pv-thumb { max-width: 120px; max-height: 120px; }
+
+/* ---------- C: in the margin ---------- */
+.pv-C .pv-card {
+  width: 220px; border: 0; border-left: 2px solid var(--model); border-radius: 0; box-shadow: none;
+  background: var(--page); font-size: 13px;
+}
+.pv-C .pv-body { padding: 2px 10px 6px 12px; }
+.pv-C .pv-x { position: absolute; right: -4px; top: -6px; }
+.pv-C .pv-card h4 { font-size: 15px; padding-right: 18px; }
+.pv-C .pv-wiki h4 { font-size: 17px; }
+.pv-C .pv-thumb { display: none; }
+.pv-C .pv-go { border-top: 0; padding: 2px 12px 4px; font-size: 12.5px; }
+.pv-C .pv-back { margin: 4px 0 2px 12px; }
+.pv-C .pv-card.pv-wiki-card { border-left-color: var(--wiki-link); }
+.pv-C .pv-card.pv-inline { position: static; width: auto; margin: 4px 0 18px; background: var(--surface-1); }
+
+/* ---------- touch and small screens (A and B): a bottom sheet ---------- */
+@media (hover: none), (max-width: 599px) {
+  .pv-A .pv-card, .pv-B .pv-card {
+    position: fixed; left: 0 !important; right: 0; top: auto !important; bottom: 0; width: auto; max-width: none;
+    max-height: 72vh; overflow-y: auto; border-radius: 14px 14px 0 0; padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pv-B .pv-body { max-height: none; }
+  body.pv-sheet-open::before { content: ""; position: fixed; inset: 0; z-index: 39; background: rgba(0, 0, 0, 0.3); }
+  .pv-go { padding: 12px 16px 16px; font-size: 15px; }
+}
+.pv-C .pv-card.pv-inline .pv-x { right: 4px; top: 2px; }
+body.pv-sheet-open .proto-bar { bottom: auto; top: 12px; }  /* keep the switcher off the sheet's Open button */
