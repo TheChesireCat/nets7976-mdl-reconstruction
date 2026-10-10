@@ -1,0 +1,90 @@
+/* PROTOTYPE (throwaway): replacements for the flowchart map and the transition cards, on anatomy variant A. */
+
+/* exactness tags: text says it, colour only seconds it */
+.tag {
+  display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+  font-size: 12px; line-height: 1.4; color: var(--text-muted);
+}
+.tag::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--axis); }
+.tag.exact::before { background: var(--edge); }
+.tag.approx::before { background: var(--g2); }
+.tag.model::before { background: var(--model); }
+.tag.check::before { background: var(--g1); }
+.rt-h { font-size: 22px; margin: 40px 0 6px; }
+.rt-intro { font-size: 15px; color: var(--text-secondary); max-width: 680px; }
+.rt-n { color: var(--model); font-weight: 600; font-variant-numeric: tabular-nums; }
+#route a { text-decoration: none; color: inherit; }
+
+/* ---------- A: numbered route ---------- */
+.rtA { max-width: 680px; }
+.rtA .rt-group { font-size: 15px; font-weight: 600; color: var(--text-primary); margin: 20px 0 4px; }
+.rtA .rt-steps { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border); }
+.rtA .rt-steps a {
+  display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 4px 12px; align-items: baseline;
+  padding: 9px 4px; border-bottom: 1px solid var(--border); font-size: 15px;
+}
+.rtA .rt-steps a:hover, .rtA .rt-steps a:focus-visible { background: var(--surface-2); }
+.rtA .rt-what b { color: var(--text-primary); font-weight: 600; margin-right: 6px; }
+.rtA .tag { justify-self: end; }
+.rt-here .tag { margin-left: 2px; }
+.rt-here a { font-size: 13px; }
+@media (max-width: 720px) {
+  .rtA .rt-steps a { grid-template-columns: 24px minmax(0, 1fr); }
+  .rtA .tag { grid-column: 2; justify-self: start; }
+}
+
+/* ---------- B: flow diagram ---------- */
+.rtB { margin-top: 36px; }
+.rtB .rt-lane-label { font-size: 14px; font-weight: 600; color: var(--text-primary); margin: 0 0 8px; }
+.rtB .rt-nodes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px; }
+.rtB .rt-nodes li { position: relative; display: flex; }
+.rtB .rt-nodes li + li::before {
+  content: ""; position: absolute; left: -24px; top: 50%; width: 20px; height: 1.5px; background: var(--axis);
+}
+.rtB .rt-nodes li + li::after {
+  content: ""; position: absolute; left: -9px; top: calc(50% - 4px); border: 4.5px solid transparent; border-left: 6px solid var(--axis);
+}
+.rtB .rt-node {
+  flex: 1; display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; min-width: 0;
+  border: 1px solid var(--border); border-radius: 8px; background: var(--surface-1);
+}
+.rtB .rt-node:hover, .rtB .rt-node:focus-visible { border-color: var(--model); }
+.rtB .rt-op { font-size: 13px; color: var(--text-secondary); }
+.rtB .rt-m { color: var(--text-primary); font-size: 16px; overflow-x: auto; }
+.rtB .rt-n { font-size: 12px; }
+.rtB .rt-join { margin: 14px 0 14px 12px; padding-left: 16px; border-left: 1.5px solid var(--axis); font-size: 13px; color: var(--text-muted); }
+.rtB figcaption { margin-top: 14px; }
+.rt-strip { display: flex; flex-wrap: wrap; gap: 6px 0; align-items: center; margin: 0 0 18px; font-size: 13px; color: var(--text-muted); }
+.rt-strip .rt-s { display: inline-flex; align-items: baseline; gap: 6px; padding: 3px 0; }
+.rt-strip .rt-s + .rt-s { position: relative; margin-left: 30px; }
+.rt-strip .rt-s + .rt-s::before { content: "→"; color: var(--axis); position: absolute; left: -21px; top: 3px; }
+.rt-strip .now { color: var(--text-primary); font-weight: 500; padding: 3px 10px; border: 1px solid var(--model); border-radius: 6px; }
+@media (max-width: 900px) {
+  .rtB .rt-nodes { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .rtB .rt-nodes li + li::before { left: 24px; top: -15px; width: 1.5px; height: 12px; }
+  .rtB .rt-nodes li + li::after { left: 20px; top: -6px; border: 4.5px solid transparent; border-top: 6px solid var(--axis); }
+  .rtB .rt-node { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 2px 8px; }
+  .rtB .rt-node > :not(.rt-n) { grid-column: 2; }
+  .rtB .rt-node .rt-n { grid-row: 1 / span 3; }
+}
+@media (max-width: 720px) {
+  .rt-strip .prev { display: none; }
+  .rt-strip .prev + .rt-s { margin-left: 0; }
+  .rt-strip .prev + .rt-s::before { display: none; }
+}
+
+/* ---------- C: chain of equations ---------- */
+.rtC { max-width: 680px; }
+.rtC .rt-group { font-size: 14px; font-weight: 600; color: var(--text-primary); margin: 18px 0 4px; }
+.rtC .rt-rung {
+  display: grid; grid-template-columns: 36px minmax(0, 1fr) 120px; gap: 4px 12px; align-items: center;
+  padding: 6px 0; border-bottom: 1px solid var(--grid);
+}
+.rtC .rt-rung > a { color: var(--model); font-weight: 600; font-size: 14px; }
+.rtC .rt-m { color: var(--text-primary); overflow-x: auto; padding: 2px 0; }
+.rtC .tag { justify-self: start; }
+.rt-rung-eq { margin: 4px 0 16px !important; }
+@media (max-width: 720px) {
+  .rtC .rt-rung { grid-template-columns: 32px minmax(0, 1fr); }
+  .rtC .tag { grid-column: 2; }
+}
