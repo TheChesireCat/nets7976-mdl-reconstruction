@@ -39,423 +39,492 @@ route:
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bayesian workflow primer · Week 4</title>
+  <title>The whole Bayesian workflow, on something small · NETS 7976</title>
   <script src="../../../week-3/code/viz-common/site.js"></script>
   <link rel="stylesheet" href="../../../week-3/code/viz-common/styles.css" />
   <link rel="stylesheet" href="../viz-common/week4.css" />
+  <link rel="stylesheet" href="../../../week-3/code/viz-common/article.css" />
 </head>
 <body>
-<div class="shell shell-1col">
+<main id="main" class="a-article">
+  <!-- article-header -->
 
-  <main>
-    <div class="controls" id="controls">
-      <span class="ctl-group-label">Toy counts (§3–7)</span>
-      <label class="ctl">λ₀ <input type="range" id="c-l0" min="0.2" max="5" step="0.1" value="1" /><output id="o-l0"></output></label>
-      <label class="ctl">λ₁ <input type="range" id="c-l1" min="2" max="30" step="0.5" value="10" /><output id="o-l1"></output></label>
-      <label class="ctl">ρ <input type="range" id="c-rho" min="0.05" max="0.8" step="0.01" value="0.3" /><output id="o-rho"></output></label>
-      <label class="ctl">N <input type="range" id="c-N" min="20" max="500" step="10" value="100" /><output id="o-N"></output></label>
-      <button id="c-seed" title="Draw new counts with the same settings">New sample</button>
-      <button id="c-dolphin" title="Settings close to the dolphin fit in Young et al.">Dolphin-like</button>
-      <span class="status" id="status"></span>
+  <!-- route -->
+
+  <!-- 1 -->
+  <section id="grid">
+    <h2><span class="sec-num">1</span>Bayes on a grid</h2>
+    <aside class="a-locator">Carpenter §5</aside>
+    <!-- strip -->
+    <p>
+      Laplace asked whether a birth is more likely to be a boy.<span class="sn-mark"></span><span class="sidenote">The counts are Laplace's live births in Paris, 1745 to 1770.</span>
+      Let <span class="m">\(\theta\)</span> be that probability. The data are <span class="m">\(y\)</span> boys out of <span class="m">\(n\)</span> births,
+      so the likelihood is binomial. With a <a data-pv="wiki:Beta distribution">Beta</a> prior, <span class="m">\(\Beta(a, b)\)</span>, the
+      <a data-pv="wiki:Bayesian inference">posterior</a> is again a Beta, which gives an exact answer to check everything else against:
+    </p>
+    <div class="eq eq-wide">\[ p(\theta \mid y) \;\propto\; \underbrace{\theta^{a-1} (1-\theta)^{b-1}}_{\text{prior}} \cdot \underbrace{\theta^{y} (1-\theta)^{n-y}}_{\text{likelihood}} \;=\; \Beta(a + y,\ b + n - y) \]</div>
+    <div class="eq-narrow">
+      <div class="eqn-row"><div class="eqn-m">\(\displaystyle p(\theta \mid y) \;\propto\; \theta^{a-1} (1-\theta)^{b-1} \cdot \theta^{y} (1-\theta)^{n-y}\)</div><div class="eqn-note">prior × likelihood</div></div>
+      <div class="eqn-row"><div class="eqn-m">\(\displaystyle \phantom{p(\theta \mid y)} = \Beta(a + y,\ b + n - y)\)</div><div class="eqn-note">again a Beta</div></div>
     </div>
+    <details class="a-dig">
+      <summary>Why does a Beta prior give a Beta posterior?</summary>
+      <p>
+        Write both densities as functions of \(\theta\) and drop every factor that doesn't involve it. The prior contributes
+        \(\theta^{a-1} (1-\theta)^{b-1}\) and the likelihood \(\theta^{y} (1-\theta)^{n-y}\). Multiplying adds the exponents, giving
+        \(\theta^{a+y-1} (1-\theta)^{b+n-y-1}\): the shape of a \(\Beta(a + y,\ b + n - y)\) density. The posterior's normalizing constant is
+        whatever makes it integrate to 1, so it has to be that Beta's. A prior with this property is called
+        <a data-pv="wiki:Conjugate prior">conjugate</a> to the likelihood.
+      </p>
+    </details>
+    <p>
+      With one parameter you can also skip the algebra: evaluate prior × likelihood on a fine grid of \(\theta\) values and divide by
+      the sum. Figure 1 does both, and the two agree.
+    </p>
+    <figure class="a-wide">
+      <div class="a-figctl">
+        <label class="ctl">prior a <input type="range" id="c-a" min="0.5" max="50" step="0.5" value="1" /><output id="o-a"></output></label>
+        <label class="ctl">prior b <input type="range" id="c-b" min="0.5" max="50" step="0.5" value="1" /><output id="o-b"></output></label>
+        <label class="ctl">share of Laplace's data <input type="range" id="c-frac" min="-4" max="0" step="0.25" value="-3" /><output id="o-frac"></output></label>
+      </div>
+      <div class="a-panels">
+        <div class="plot" id="p-grid"></div>
+        <div class="plot" id="p-summary"></div>
+      </div>
+      <figcaption>
+        <b>Prior × likelihood → posterior.</b> Left: the grid approximation (dots) against the exact Beta (line). The likelihood is scaled to
+        integrate to 1 so it fits the same axis, and the axis zooms to where the posterior is. Right: the posterior's mean, median and mode
+        (nearly the same here), its central 95% interval, and \(\theta = \tfrac12\), the value Laplace's question is about.
+        Raise prior a to 40, then slide the data share to 100%.
+        <span class="a-readout"><span class="a-now">Now:</span> <span id="t-grid"></span></span>
+      </figcaption>
+    </figure>
+    <p class="a-key">
+      <b>Data overwhelm the prior.</b> With 0.01% of the data, about 20 births, the prior sliders move the posterior a lot. Slide to the full
+      data and no reasonable prior matters: \(P(\theta \le \tfrac12)\) drops to about \(10^{-42}\). That is Laplace's answer: boys really are more likely.
+    </p>
+    <p>
+      The grid works because there is only one parameter. With \(d\) parameters a grid needs \(400^d\) points, which is why the rest of the
+      page uses samples.
+    </p>
+  </section>
 
-    <div class="content">
-      <!-- article-header -->
+  <!-- 2 -->
+  <section id="mc">
+    <h2><span class="sec-num">2</span>Monte Carlo: answers from draws</h2>
+    <aside class="a-locator">Carpenter §3.3, §5.8–5.9</aside>
+    <!-- strip -->
+    <p>
+      Every posterior summary is an expectation: the mean is <span class="m">\(\mathbb{E}[\theta]\)</span>, and a probability like
+      <span class="m">\(P(\theta \le \tfrac12)\)</span> is <span class="m">\(\mathbb{E}[\mathbf{1}(\theta \le \tfrac12)]\)</span>. Given independent draws from the
+      posterior, you estimate any of them by averaging. The error shrinks like <span class="m">\(\mathrm{sd} / \sqrt{M}\)</span> whatever the
+      dimension, which a grid cannot do.<span class="sn-mark"></span><span class="sidenote">This is the Monte Carlo standard error; see
+      <a data-pv="wiki:Monte Carlo integration">Monte Carlo integration</a>.</span> These draws come from the §1 posterior.
+    </p>
+    <figure class="a-wide">
+      <div class="a-figctl">
+        <label class="ctl">draws M <input type="range" id="c-M" min="1" max="4" step="0.25" value="3" /><output id="o-M"></output></label>
+        <button type="button" id="c-mc">New draws</button>
+      </div>
+      <div class="a-panels">
+        <div class="plot" id="p-mchist"></div>
+        <div class="plot" id="p-mcrun"></div>
+      </div>
+      <figcaption>
+        <b>Answers from draws.</b> Left: a histogram of \(M\) independent draws against the exact posterior (line); nothing here uses the
+        Beta's formula except to draw the line. Right: the average of the first \(m\) draws (line), the exact mean (hairline) and a
+        \(\pm 2\) Monte Carlo standard error band. Slide \(M\) from 10 up to 10,000 and watch the band narrow.
+        <span class="a-readout"><span class="a-now">Now:</span> <span id="t-mc"></span></span>
+      </figcaption>
+    </figure>
+    <p class="a-key">
+      <b>Counting cannot see rare events.</b> With the full data the estimate of \(P(\theta \le \tfrac12)\) is exactly 0 for any \(M\) you could
+      afford, because the true value is about \(10^{-42}\). Averages of draws are good for things that happen often under the posterior.
+    </p>
+    <p>
+      These draws are independent. <a data-pv="concept:markov-chain-monte-carlo">MCMC</a> draws are not, and §4 is about what that costs.
+    </p>
+  </section>
 
-      <!-- 0 -->
-      <!-- route -->
-
-      <!-- 1 -->
-      <section id="grid">
-        <div class="sec-head"><span class="sec-num">1</span><h2>Bayes on a grid</h2></div>
-        <div class="refs">Carpenter §5 · Laplace's live births, Paris 1745–1770</div>
-        <!-- strip -->
-        <p>
-          Laplace asked whether a birth is more likely to be a boy. Let <span class="m">\(\theta\)</span> be that probability. The data are
-          <span class="m">\(y\)</span> boys out of <span class="m">\(n\)</span> births, so the likelihood is binomial. With a
-          <span class="m">\(\Beta(a, b)\)</span> prior the posterior is again a Beta, which gives an exact answer to check everything
-          else against:
-        </p>
-        <div class="eq">\[ p(\theta \mid y) \;\propto\; \underbrace{\theta^{a-1} (1-\theta)^{b-1}}_{\text{prior}} \cdot \underbrace{\theta^{y} (1-\theta)^{n-y}}_{\text{likelihood}} \;=\; \Beta(a + y,\ b + n - y) \]</div>
-        <p>
-          With one parameter you can also skip the algebra: evaluate prior × likelihood on a fine grid of \(\theta\) values and divide by
-          the sum. The dots are that grid approximation and the line is the exact Beta.
-        </p>
-        <div class="section-controls">
-          <label class="ctl">prior a <input type="range" id="c-a" min="0.5" max="50" step="0.5" value="1" /><output id="o-a"></output></label>
-          <label class="ctl">prior b <input type="range" id="c-b" min="0.5" max="50" step="0.5" value="1" /><output id="o-b"></output></label>
-          <label class="ctl">share of Laplace's data <input type="range" id="c-frac" min="-4" max="0" step="0.25" value="-3" /><output id="o-frac"></output></label>
-        </div>
-        <div id="t-grid"></div>
-        <div class="grid-2">
-          <div class="card">
-            <h3>Prior × likelihood → posterior</h3>
-            <p class="sub">The x-axis zooms to where the posterior is. The likelihood is scaled to integrate to 1 so it fits on the same axis.</p>
-            <div class="plot" id="p-grid"></div>
-          </div>
-          <div class="card">
-            <h3>Summarizing the posterior</h3>
-            <p class="sub">Mean, median and mode (nearly the same here), the central 95% interval, and \(\theta = \tfrac12\), the value Laplace's question is about.</p>
-            <div class="plot" id="p-summary"></div>
-          </div>
-        </div>
-        <div class="takeaway">
-          <b>Data overwhelm the prior.</b> With 0.01% of the data (about 20 births) the prior sliders move the posterior a lot.
-          Slide to the full data and no reasonable prior matters: \(P(\theta \le \tfrac12)\) drops to about \(10^{-42}\). That is Laplace's answer:
-          boys really are more likely. The grid works because there is only one parameter. With \(d\) parameters a grid needs
-          \(400^d\) points, which is why the rest of the page uses samples.
-        </div>
-      </section>
-
-      <!-- 2 -->
-      <section id="mc">
-        <div class="sec-head"><span class="sec-num">2</span><h2>Monte Carlo: answers from draws</h2></div>
-        <div class="refs">Carpenter §3.3, §5.8–5.9</div>
-        <!-- strip -->
-        <p>
-          Every posterior summary is an expectation: the mean is <span class="m">\(\mathbb{E}[\theta]\)</span>, and a probability like
-          <span class="m">\(P(\theta \le \tfrac12)\)</span> is <span class="m">\(\mathbb{E}[\mathbf{1}(\theta \le \tfrac12)]\)</span>. Given independent draws from the posterior, you
-          estimate any of them by averaging. The error shrinks like <span class="m">\(\mathrm{sd} / \sqrt{M}\)</span> whatever the dimension, which
-          a grid cannot do. These draws come from the section 1 posterior.
-        </p>
-        <div class="section-controls">
-          <label class="ctl">draws M <input type="range" id="c-M" min="1" max="4" step="0.25" value="3" /><output id="o-M"></output></label>
-          <button id="c-mc">New draws</button>
-        </div>
-        <div id="t-mc"></div>
-        <div class="grid-2">
-          <div class="card">
-            <h3>Histogram of the draws vs. the exact posterior</h3>
-            <p class="sub">More draws, closer match. Nothing here uses the formula for the Beta except to draw the line.</p>
-            <div class="plot" id="p-mchist"></div>
-          </div>
-          <div class="card">
-            <h3>The running estimate of the mean</h3>
-            <p class="sub">Average of the first \(m\) draws (line), the exact mean (hairline), and the \(\pm 2\) Monte Carlo standard error band.</p>
-            <div class="plot" id="p-mcrun"></div>
-          </div>
-        </div>
-        <div class="takeaway">
-          <b>Counting cannot see rare events.</b> With the full data the estimate of \(P(\theta \le \tfrac12)\) is exactly 0 for any \(M\) you could
-          afford, because the true value is about \(10^{-42}\). Averages of draws are good for things that happen often under the posterior.
-          This page's draws are independent. MCMC draws are not, and the next section is about what that costs.
-        </div>
-      </section>
-
-      <!-- 3 -->
-      <section id="toy">
-        <div class="sec-head"><span class="sec-num">3</span><h2>The toy problem: friends and strangers</h2></div>
-        <div class="refs">The dolphin model with the network taken away · Young et al. §3.1</div>
-        <!-- strip -->
-        <p>
-          You have <span class="m">\(N\)</span> counts, each one how often a pair of animals was seen together. A pair is either
-          <strong>strangers</strong>, who meet by chance about <span class="m">\(\lambda_0\)</span> times, or <strong>friends</strong>, who meet
-          about <span class="m">\(\lambda_1\)</span> times. A share <span class="m">\(\rho\)</span> of the pairs are friends. The hidden label
-          <span class="m">\(z_i\)</span> says which kind pair <span class="m">\(i\)</span> is:
-        </p>
-        <div class="eq">\[ \begin{aligned}
+  <!-- 3 -->
+  <section id="toy">
+    <h2><span class="sec-num">3</span>The toy problem: friends and strangers</h2>
+    <aside class="a-locator">Young et al. §3.1</aside>
+    <!-- strip -->
+    <p>
+      You have <span class="m">\(N\)</span> counts, each one how often a pair of animals was seen together.<span class="sn-mark"></span><span class="sidenote">This is
+      the dolphin model of Young et al. with the network taken away.</span> A pair is either <strong>strangers</strong>, who meet by chance about
+      <span class="m">\(\lambda_0\)</span> times, or <strong>friends</strong>, who meet about <span class="m">\(\lambda_1\)</span> times. A share
+      <span class="m">\(\rho\)</span> of the pairs are friends. The hidden label <span class="m">\(z_i\)</span> says which kind pair <span class="m">\(i\)</span> is,
+      and each count is <a data-pv="wiki:Poisson distribution">Poisson</a> with that kind's rate:
+    </p>
+    <div class="eq eq-wide">\[ \begin{aligned}
   z_i &amp;\sim \Bernoulli(\rho) &amp;&amp; \text{is pair } i \text{ friends?} &amp;&amp; \text{hidden} \\
   x_i \mid z_i &amp;\sim \Poisson(\lambda_{z_i}) &amp;&amp; \text{how often they were seen together} &amp;&amp; \text{observed}
 \end{aligned} \]</div>
-        <p>
-          <strong>The inference problem:</strong> from the counts alone, find <span class="m">\(\theta = (\lambda_0, \lambda_1, \rho)\)</span> and, for each pair,
-          <span class="m">\(P(z_i = 1 \mid x)\)</span>. The top bar sets the true values used to simulate the counts. The samplers never see
-          them, so you can check what they recover.
-        </p>
-        <div class="card">
-          <h3>What you observe</h3>
-          <p class="sub">The \(N\) counts from the top bar. Which of them come from friends is exactly what you can't see; §5 colours them in.</p>
-          <p class="note" id="t-toy"></p>
-          <div class="plot" id="p-toy"></div>
+    <div class="eq-narrow">
+      <div class="eqn-row"><div class="eqn-m">\(z_i \sim \Bernoulli(\rho)\)</div><div class="eqn-note">is pair \(i\) friends? Hidden.</div></div>
+      <div class="eqn-row"><div class="eqn-m">\(x_i \mid z_i \sim \Poisson(\lambda_{z_i})\)</div><div class="eqn-note">how often they were seen together. Observed.</div></div>
+    </div>
+    <p>
+      <strong>The inference problem:</strong> from the counts alone, find <span class="m">\(\theta = (\lambda_0, \lambda_1, \rho)\)</span> and, for each pair,
+      <span class="m">\(P(z_i = 1 \mid x)\)</span>. The strip above Figure 3 sets the true values used to simulate the counts. The samplers never
+      see them, so you can check what they recover.
+    </p>
+    <figure class="a-wide">
+      <div class="a-figctl">
+        <div class="toy-strip" role="group" aria-label="Toy counts, shared by §3 to §7">
+          <span class="strip-label">Toy counts</span>
+          <label class="ctl">λ₀ <input type="range" id="c-l0" min="0.2" max="5" step="0.1" value="1" /><output id="o-l0"></output></label>
+          <label class="ctl">λ₁ <input type="range" id="c-l1" min="2" max="30" step="0.5" value="10" /><output id="o-l1"></output></label>
+          <label class="ctl">ρ <input type="range" id="c-rho" min="0.05" max="0.8" step="0.01" value="0.3" /><output id="o-rho"></output></label>
+          <label class="ctl">N <input type="range" id="c-N" min="20" max="500" step="10" value="100" /><output id="o-N"></output></label>
+          <button type="button" id="c-seed" title="Draw new counts with the same settings">New sample</button>
+          <button type="button" id="c-dolphin" title="Settings close to the dolphin fit in Young et al.">Dolphin-like</button>
+          <span class="status" id="status"></span>
         </div>
-        <div class="takeaway">
-          <b>\(z\) is discrete, so the samplers never touch it.</b> HMC needs a gradient, so §4 and §5 use the likelihood with z summed out,
-          <span class="m">\(p(x_i \mid \theta) = \rho \Poisson(x_i \mid \lambda_1) + (1 - \rho) \Poisson(x_i \mid \lambda_0)\)</span>, and recover the \(z\)'s afterwards.
-          §5 explains why that sum is exact. For the dolphins, pair \(i\) becomes the pair \((i, j)\) and \(z_i\) becomes the edge \(A_{ij}\).
-        </div>
-      </section>
+      </div>
+      <div class="plot" id="p-toy"></div>
+      <figcaption>
+        <b>What you observe.</b> The \(N\) counts, with no labels: which come from friends is exactly what you can't see, and §5 colours them in.
+        The same strip of toy counts sits above every figure up to §7, and every copy moves the others. Drag λ₁ down towards λ₀ and watch the
+        two humps merge. <span class="a-readout" id="t-toy"></span>
+      </figcaption>
+    </figure>
+    <p class="a-key">
+      <b>\(z\) is discrete, so the samplers never touch it.</b> HMC needs a gradient, so §4 and §5 use the likelihood with \(z\)
+      <a data-pv="concept:marginalization">summed out</a>, and recover the \(z\)'s afterwards:
+    </p>
+    <div class="eq">\[ p(x_i \mid \theta) = \rho \Poisson(x_i \mid \lambda_1) + (1 - \rho) \Poisson(x_i \mid \lambda_0) \]</div>
+    <p>
+      §5 explains why that sum is exact. For the dolphins, pair \(i\) becomes the pair \((i, j)\) and \(z_i\) becomes the edge \(A_{ij}\).
+    </p>
+  </section>
 
-      <!-- 4 -->
-      <section id="mcmc">
-        <div class="sec-head"><span class="sec-num">4</span><h2>When you can't draw directly: Metropolis vs. HMC</h2></div>
-        <div class="refs">Carpenter §1.2, §3.4, §6 · Young et al. §3.1.2, Fig. 3</div>
-        <!-- strip -->
-        <p>
-          To make the posterior visible, this section holds \(\rho\) at its true value (\(z\) is summed out, as in §3), so the posterior of the
-          §3 counts is a 2-D surface over
-          <span class="m">\((\lambda_0, \lambda_1)\)</span> that you can see (background). There is no formula for drawing from it, but a Markov
-          chain can walk it so that its positions, in the long run, are draws from it.
-        </p>
-        <p>
-          <strong>Metropolis</strong> proposes a random step and accepts it with probability
-          <span class="m">\(\min\bigl(1,\ p(\text{new}) / p(\text{old})\bigr)\)</span>. It is blind to the surface's shape, so its steps must be small, and
-          consecutive draws are highly correlated. <strong>HMC</strong>, which Stan uses, treats <span class="m">\(-\log p\)</span> as a
-          landscape and flicks a ball across it: a random momentum, then <span class="m">\(L\)</span> small steps of size
-          <span class="m">\(\varepsilon\)</span> that follow the gradient. The ball goes far but stays where the probability is. Four chains
-          start from scattered points, and the first quarter of each run is warmup, which is discarded.
-        </p>
-        <div class="section-controls">
-          <label class="ctl">Metropolis step <input type="range" id="c-mh" min="-2.5" max="0" step="0.1" value="-0.9" /><output id="o-mh"></output></label>
-          <label class="ctl">HMC ε <input type="range" id="c-eps" min="-2.5" max="-0.3" step="0.05" value="-1.3" /><output id="o-eps"></output></label>
-          <label class="ctl">HMC L <input type="range" id="c-L" min="1" max="40" step="1" value="5" /><output id="o-L"></output></label>
-          <label class="ctl">iterations <input type="range" id="c-it" min="200" max="3000" step="100" value="1000" /><output id="o-it"></output></label>
+  <!-- 4 -->
+  <section id="mcmc">
+    <h2><span class="sec-num">4</span>When you can't draw directly: Metropolis vs. HMC</h2>
+    <aside class="a-locator">Carpenter §1.2, §3.4, §6 · Young et al. §3.1.2, Fig. 3</aside>
+    <!-- strip -->
+    <p>
+      To make the posterior visible, this section holds \(\rho\) at its true value (\(z\) is summed out, as in §3), so the posterior of the
+      §3 counts is a 2-D surface over <span class="m">\((\lambda_0, \lambda_1)\)</span> that you can see. There is no formula for drawing from it,
+      but a <a data-pv="concept:markov-chain-monte-carlo">Markov chain</a> can walk it so that its positions, in the long run, are draws from it.
+    </p>
+    <p>
+      <a data-pv="concept:markov-chain-monte-carlo#metropolis">Metropolis</a> proposes a random step and accepts it with probability
+      <span class="m">\(\min\bigl(1,\ p(\text{new}) / p(\text{old})\bigr)\)</span>. It is blind to the surface's shape, so its steps must be small, and
+      consecutive draws are highly correlated. <a data-pv="concept:markov-chain-monte-carlo#hmc">HMC</a>, which
+      <a data-pv="wiki:Stan (software)">Stan</a> uses, treats <span class="m">\(-\log p\)</span> as a landscape and flicks a ball across it: a random
+      momentum, then <span class="m">\(L\)</span> small steps of size <span class="m">\(\varepsilon\)</span> that follow the gradient. The ball goes far
+      but stays where the probability is. Four chains start from scattered points, and the first quarter of each run is warmup, which is discarded.
+    </p>
+    <figure class="a-wide">
+      <div class="a-figctl">
+        <div class="toy-strip" role="group" aria-label="Toy counts, shared by §3 to §7">
+          <span class="strip-label">Toy counts</span>
+          <label class="ctl">λ₀ <input type="range" data-for="c-l0" /><output data-show="o-l0"></output></label>
+          <label class="ctl">λ₁ <input type="range" data-for="c-l1" /><output data-show="o-l1"></output></label>
+          <label class="ctl">ρ <input type="range" data-for="c-rho" /><output data-show="o-rho"></output></label>
+          <label class="ctl">N <input type="range" data-for="c-N" /><output data-show="o-N"></output></label>
+          <button type="button" data-click="c-seed">New sample</button>
+          <button type="button" data-click="c-dolphin">Dolphin-like</button>
+          <span class="status" data-show="status"></span>
         </div>
-        <div class="section-controls">
-          <label class="ctl">show first <input type="range" id="c-show" min="1" max="60" step="1" value="60" /><output id="o-show"></output> steps of chain 1</label>
-          <button id="c-play">▶ Play</button>
-        </div>
-        <div class="grid-2">
-          <div class="card">
-            <h3>Metropolis: random proposals</h3>
-            <p class="sub">Solid: accepted moves. Faint crosses: rejected proposals. Background: the posterior, stronger colour is more probable.</p>
-            <div class="plot" id="p-path-mh"></div>
-          </div>
-          <div class="card">
-            <h3>HMC: leapfrog trajectories</h3>
-            <p class="sub">Each faint curve is one trajectory of \(L\) leapfrog steps. Its end point is the proposal.</p>
-            <div class="plot" id="p-path-hmc"></div>
-          </div>
-        </div>
-        <div class="grid-2 mt">
-          <div class="card">
-            <h3>Metropolis: trace of \(\lambda_1\), four chains</h3>
-            <div id="t-mh"></div>
-            <div class="plot" id="p-trace-mh"></div>
-          </div>
-          <div class="card">
-            <h3>HMC: trace of \(\lambda_1\), four chains</h3>
-            <div id="t-hmc"></div>
-            <div class="plot" id="p-trace-hmc"></div>
-          </div>
-        </div>
-        <div class="card mt">
-          <h3>Autocorrelation of \(\lambda_1\) (chain 1, after warmup)</h3>
-          <p class="sub">How similar a draw is to the one \(k\) steps earlier. The faster it falls to 0, the more each draw is worth.</p>
-          <div class="plot" id="p-acf"></div>
-        </div>
-        <p class="note mt">With only two parameters a well-tuned Metropolis sampler does fine. The gap grows with the number of parameters: on the dolphin
-          model (three to five parameters, with \(\rho\) and \(\lambda_0\) correlated), Metropolis at the same number of iterations still has \(\hat R\) well above
-          1.01 and an order of magnitude fewer effective draws per unit of work, while HMC has converged.</p>
+        <label class="ctl">Metropolis step <input type="range" id="c-mh" min="-2.5" max="0" step="0.1" value="-0.9" /><output id="o-mh"></output></label>
+        <label class="ctl">HMC ε <input type="range" id="c-eps" min="-2.5" max="-0.3" step="0.05" value="-1.3" /><output id="o-eps"></output></label>
+        <label class="ctl">HMC L <input type="range" id="c-L" min="1" max="40" step="1" value="5" /><output id="o-L"></output></label>
+        <label class="ctl">iterations <input type="range" id="c-it" min="200" max="3000" step="100" value="1000" /><output id="o-it"></output></label>
+        <label class="ctl">show first <input type="range" id="c-show" min="1" max="60" step="1" value="60" /><output id="o-show"></output> steps of chain 1</label>
+        <button type="button" id="c-play">▶ Play</button>
+      </div>
+      <div class="a-panels">
+        <div class="plot" id="p-path-mh"></div>
+        <div class="plot" id="p-path-hmc"></div>
+      </div>
+      <figcaption>
+        <b>Metropolis (left) against HMC (right) on the same posterior.</b> Background: the posterior; a stronger colour is more probable.
+        Left, solid lines are accepted moves and faint crosses rejected proposals. Right, each faint curve is one trajectory of \(L\) leapfrog
+        steps, and its end point is the proposal. Try a huge Metropolis step (almost nothing is accepted), a tiny one (every move is accepted
+        but goes nowhere), or an HMC \(\varepsilon\) so large that the trajectories fly off and get rejected. Then try \(L = 10\).
+      </figcaption>
+    </figure>
+    <p>
+      At \(L = 10\) and this \(\varepsilon\) a trajectory curls back to where it started, so the extra work buys nothing.<span class="sn-mark"></span><span class="sidenote">That
+      is why Stan uses NUTS, the No-U-Turn Sampler, which picks the length of each trajectory by itself.</span>
+      Two numbers say whether to trust the chains. <a data-pv="concept:markov-chain-monte-carlo#diagnostics">\(\hat R\)</a> compares the chains with
+      each other, and with the two halves of themselves: it is near 1 when they all describe the same distribution, and above about 1.01 means
+      keep going. The effective sample size (ESS) is how many independent draws the correlated ones are worth.
+    </p>
+    <figure class="a-wide">
+      <div class="a-panels">
+        <div class="a-panel"><p class="a-panel-h">Metropolis</p><div class="plot" id="p-trace-mh"></div></div>
+        <div class="a-panel"><p class="a-panel-h">HMC</p><div class="plot" id="p-trace-hmc"></div></div>
+      </div>
+      <figcaption>
+        <b>Trace of \(\lambda_1\), four chains.</b> ESS per 1000 evaluations is the fair comparison, because each HMC step costs \(L\) gradient
+        evaluations. Shrink the Metropolis step until \(\hat R\) climbs above 1.01.
+        <span class="a-readout"><span class="a-now">Metropolis:</span> <span id="t-mh"></span></span>
+        <span class="a-readout"><span class="a-now">HMC:</span> <span id="t-hmc"></span></span>
+      </figcaption>
+    </figure>
+    <figure class="a-wide">
+      <div class="plot" id="p-acf"></div>
+      <figcaption>
+        <b>Autocorrelation of \(\lambda_1\)</b> (chain 1, after warmup): how similar a draw is to the one \(k\) steps earlier. The faster it falls
+        to 0, the more each draw is worth.
+      </figcaption>
+    </figure>
+    <p>
+      With only two parameters a well-tuned Metropolis sampler does fine. The gap grows with the number of parameters.<span class="sn-mark"></span><span class="sidenote">On
+      the dolphin model (three to five parameters, with \(\rho\) and \(\lambda_0\) correlated), Metropolis at the same number of iterations still has
+      \(\hat R\) well above 1.01 and an order of magnitude fewer effective draws per unit of work, while HMC has converged.</span>
+    </p>
 
-        <h3 class="subhead" id="corr">What "correlated draws" means</h3>
-        <p>
-          Strip a chain down to one number: the correlation \(\phi\) between each draw and the next. Here the target is a standard normal and
-          each draw is <span class="m">\(x_{t+1} = \phi\, x_t + \sqrt{1 - \phi^2}\, \text{noise}\)</span>, so every value of \(\phi\) samples the <em>same</em> distribution.
-          Only the order of the draws changes. With <strong>\(\phi &gt; 0\)</strong> the chain is sticky: each draw repeats much of the last one,
-          as Metropolis with small steps does. With <strong>\(\phi &lt; 0\)</strong> it zig-zags: a high draw tends to be followed by a low one,
-          as HMC does when a trajectory overshoots the centre and lands on the far side.
-        </p>
-        <div class="section-controls">
+    <details class="a-dig" id="corr" data-moves-to="concept:markov-chain-monte-carlo#diagnostics">
+      <summary>What does "correlated draws" mean?</summary>
+      <p>
+        Strip a chain down to one number: the correlation \(\phi\) between each draw and the next. Here the target is a standard normal and
+        each draw is <span class="m">\(x_{t+1} = \phi\, x_t + \sqrt{1 - \phi^2}\, \text{noise}\)</span>, so every value of \(\phi\) samples the
+        <em>same</em> distribution. Only the order of the draws changes. With <strong>\(\phi &gt; 0\)</strong> the chain is sticky: each draw
+        repeats much of the last one, as Metropolis with small steps does. With <strong>\(\phi &lt; 0\)</strong> it zig-zags: a high draw tends to
+        be followed by a low one, as HMC does when a trajectory overshoots the centre and lands on the far side.
+      </p>
+      <figure class="a-wide">
+        <div class="a-figctl">
           <label class="ctl">lag-1 correlation φ <input type="range" id="c-phi" min="-0.9" max="0.95" step="0.05" value="0.9" /><output id="o-phi"></output></label>
           <span class="seg" id="c-phipreset">
-            <button data-phi="0.9" class="on">sticky · 0.9</button><button data-phi="0">independent · 0</button><button data-phi="-0.7">zig-zag · −0.7</button>
+            <button type="button" data-phi="0.9" class="on">sticky · 0.9</button><button type="button" data-phi="0">independent · 0</button><button type="button" data-phi="-0.7">zig-zag · −0.7</button>
           </span>
         </div>
-        <div id="t-corr"></div>
-        <div class="grid-3">
-          <div class="card">
-            <h3>The first 60 draws</h3>
-            <p class="sub">Same target every time, \(\mathcal{N}(0, 1)\). Only the path through it differs.</p>
-            <div class="plot" id="p-ar-trace"></div>
-          </div>
-          <div class="card">
-            <h3>Each draw against the next</h3>
-            <p class="sub">Tilted up: sticky. Round: independent. Tilted down: zig-zag.</p>
-            <div class="plot" id="p-ar-lag"></div>
-          </div>
-          <div class="card">
-            <h3>How wrong is the average of 100 draws?</h3>
-            <p class="sub">500 independent reruns. Bars: this \(\phi\). Line: what 100 independent draws give.</p>
-            <div class="plot" id="p-ar-mean"></div>
-          </div>
+        <div class="a-panels a-panels-3">
+          <div class="plot" id="p-ar-trace"></div>
+          <div class="plot" id="p-ar-lag"></div>
+          <div class="plot" id="p-ar-mean"></div>
         </div>
-        <div class="takeaway">
-          <b>The effective sample size counts how much the errors cancel.</b> For this chain the autocorrelation time is
-          \(\tau = (1 + \phi)/(1 - \phi)\), and \(\mathrm{ESS} = N/\tau\). Sticky draws (\(\phi = 0.9\)) give \(\tau = 19\): 100 draws are worth about 5 independent ones, and the
-          averages spread widely. Zig-zag draws (\(\phi = -0.7\)) give \(\tau \approx 0.18\): each overshoot is corrected by the next draw, so 100 draws
-          are worth about 570, and the averages are <em>tighter</em> than independent sampling could make them.
-        </div>
-        <div class="takeaway">
-          <b>Read the tiles, not the traces alone.</b>
-          <br>&bull; <b>\(\hat R\)</b> compares the chains with each other, and with the two halves of themselves. It is near 1 when they all
-          describe the same distribution, and above about 1.01 means keep going.
-          <br>&bull; <b>ESS</b> is how many <em>independent</em> draws your correlated ones are worth.
-          <br>&bull; <b>ESS per 1000 evaluations</b> is the fair comparison, because each HMC step costs L gradient evaluations.
-          HMC's ESS can even exceed the number of draws: its zig-zag autocorrelation means successive draws are <em>negatively</em>
-          correlated, so their errors partly cancel.
-          <br>Try a huge Metropolis step (almost nothing is accepted), a tiny one (every move is accepted but goes nowhere), or an HMC \(\varepsilon\) so
-          large that the trajectories fly off and get rejected. Then try \(L = 10\): at this \(\varepsilon\) a trajectory curls back to where it
-          started, so the extra work buys nothing. That is why Stan uses NUTS, which picks the length of each trajectory by itself.
-        </div>
-      </section>
+        <figcaption>
+          <b>The same target, \(\mathcal{N}(0, 1)\), three ways.</b> Left: the first 60 draws; only the path through the target differs. Middle:
+          each draw against the next, tilted up when sticky, round when independent, tilted down when zig-zag. Right: the averages of 100 draws
+          over 500 independent reruns (bars), against what 100 independent draws give (line). Compare sticky with zig-zag.
+          <span class="a-readout"><span class="a-now">Now:</span> <span id="t-corr"></span></span>
+        </figcaption>
+      </figure>
+      <p class="a-key">
+        <b>The effective sample size counts how much the errors cancel.</b> For this chain the autocorrelation time is
+        \(\tau = (1 + \phi)/(1 - \phi)\), and \(\mathrm{ESS} = N/\tau\). Sticky draws (\(\phi = 0.9\)) give \(\tau = 19\): 100 draws are worth about
+        5 independent ones, and the averages spread widely. Zig-zag draws (\(\phi = -0.7\)) give \(\tau \approx 0.18\): each overshoot is corrected by
+        the next draw, so 100 draws are worth about 570, and the averages are <em>tighter</em> than independent sampling could make them.
+      </p>
+      <p>
+        That is why HMC's ESS can exceed the number of draws: its zig-zag autocorrelation means successive draws are <em>negatively</em> correlated,
+        so their errors partly cancel.
+      </p>
+    </details>
+  </section>
 
-      <!-- 5 -->
-      <section id="marg">
-        <div class="sec-head"><span class="sec-num">5</span><h2>Summing out a discrete unknown</h2></div>
-        <div class="refs">Carpenter §11 · Young et al. Eqs. (A.12)–(A.14)</div>
-        <!-- strip -->
-        <p>
-          Now \(\rho\) is unknown too, and so is each count's label <span class="m">\(z_i\)</span> (which Poisson it came from). HMC needs a
-          gradient, so it cannot move a discrete <span class="m">\(z\)</span>. Stan doesn't allow discrete parameters at all. The fix
-          is to sum each label out. The labels are independent given the parameters, so the sum over all
-          <span class="m">\(2^N\)</span> labellings splits into <span class="m">\(N\)</span> two-term sums:
-        </p>
-        <div class="eq">\[ \begin{aligned}
+  <!-- 5 -->
+  <section id="marg">
+    <h2><span class="sec-num">5</span>Summing out a discrete unknown</h2>
+    <aside class="a-locator">Carpenter §11 · Young et al. Eqs. (A.12)–(A.14)</aside>
+    <!-- strip -->
+    <p>
+      Now \(\rho\) is unknown too, and so is each count's label <span class="m">\(z_i\)</span> (which Poisson it came from). HMC needs a gradient,
+      so it cannot move a discrete <span class="m">\(z\)</span>, and Stan doesn't allow discrete parameters at all. The fix is to
+      <a data-pv="concept:marginalization">sum each label out</a>, which leaves the likelihood of a two-component
+      <a data-pv="wiki:Mixture model">mixture</a>. The labels are independent given the parameters, so the sum over all
+      <span class="m">\(2^N\)</span> labellings splits into <span class="m">\(N\)</span> two-term sums:
+    </p>
+    <div class="eq">\[ \begin{aligned}
   p(x \mid \lambda, \rho) &amp;= \prod_i \bigl[ \rho \Poisson(x_i \mid \lambda_1) + (1 - \rho) \Poisson(x_i \mid \lambda_0) \bigr] \\[8pt]
   Q_i &amp;= \frac{\rho \Poisson(x_i \mid \lambda_1)}{\rho \Poisson(x_i \mid \lambda_1) + (1 - \rho) \Poisson(x_i \mid \lambda_0)}
 \end{aligned} \]</div>
-        <p>
-          After sampling \((\lambda, \rho)\), the labels come back for free: for each draw, <span class="m">\(Q_i\)</span> is the probability that count
-          <span class="m">\(i\)</span> came from the high component. Averaging over draws gives the posterior. <span class="m">\(Q_i\)</span> is
-          exactly Newman's E-step (Week 3) and the paper's Eq. (A.14). The difference is that here it is averaged over the uncertainty in \(\theta\)
-          rather than evaluated at a single \(\hat\theta\).
-        </p>
-        <div id="t-marg"></div>
-        <div class="grid-2">
-          <div class="card">
-            <h3>The counts, and the fitted mixture</h3>
-            <p class="sub">Bars: how many counts took each value, split by their true (hidden) label. Line: the model's expected histogram at the posterior mean.</p>
-            <div class="plot" id="p-hist"></div>
-          </div>
-          <div class="card">
-            <h3>\(Q(x)\): the label, recovered</h3>
-            <p class="sub">Posterior probability that a count \(x\) came from the \(\lambda_1\) component (line, 90% band over draws), vs. the true share among these data (dots).</p>
-            <div class="plot" id="p-Q"></div>
-          </div>
+    <p>
+      After sampling \((\lambda, \rho)\), the labels come back for free: for each draw, <span class="m">\(Q_i\)</span> is the probability that count
+      <span class="m">\(i\)</span> came from the high component. Averaging over draws gives the posterior. <span class="m">\(Q_i\)</span> is the paper's
+      Eq. (A.14).<span class="sn-mark"></span><span class="sidenote">It is also exactly the E-step of EM in
+      <a data-pv="article:newman#em">Newman's Week 3 article</a>, which evaluates it at a single \(\hat\theta\) instead of averaging over \(\theta\).</span>
+    </p>
+    <figure class="a-wide">
+      <div class="a-figctl">
+        <div class="toy-strip" role="group" aria-label="Toy counts, shared by §3 to §7">
+          <span class="strip-label">Toy counts</span>
+          <label class="ctl">λ₀ <input type="range" data-for="c-l0" /><output data-show="o-l0"></output></label>
+          <label class="ctl">λ₁ <input type="range" data-for="c-l1" /><output data-show="o-l1"></output></label>
+          <label class="ctl">ρ <input type="range" data-for="c-rho" /><output data-show="o-rho"></output></label>
+          <label class="ctl">N <input type="range" data-for="c-N" /><output data-show="o-N"></output></label>
+          <button type="button" data-click="c-seed">New sample</button>
+          <button type="button" data-click="c-dolphin">Dolphin-like</button>
+          <span class="status" data-show="status"></span>
         </div>
-        <div class="takeaway">
-          <b>Marginalize, sample, then condition.</b> That is the paper's algorithm. It works here, as it does for the dolphins,
-          because the labels are independent once the parameters are fixed. The uncertain labels are the counts in the overlap between the two
-          Poissons, where \(Q\) is near \(\tfrac12\). Push \(\lambda_0\) and \(\lambda_1\) together to widen the overlap.
-        </div>
-      </section>
+      </div>
+      <div class="a-panels">
+        <div class="plot" id="p-hist"></div>
+        <div class="plot" id="p-Q"></div>
+      </div>
+      <figcaption>
+        <b>The counts, and the label recovered.</b> Left: how many counts took each value, split by their true (hidden) label, with the model's
+        expected histogram at the posterior mean (line). Right: \(Q(x)\), the posterior probability that a count \(x\) came from the \(\lambda_1\)
+        component (line, 90% band over draws), against the true share among these data (dots). Push λ₀ and λ₁ together to widen the overlap.
+        <span class="a-readout"><span class="a-now">Now:</span> <span id="t-marg"></span></span>
+      </figcaption>
+    </figure>
+    <p class="a-key">
+      <b>Marginalize, sample, then condition.</b> That is the paper's algorithm. It works here, as it does for the dolphins, because the labels
+      are independent once the parameters are fixed. The uncertain labels are the counts in the overlap between the two Poissons, where \(Q\)
+      is near \(\tfrac12\).
+    </p>
+  </section>
 
-      <!-- 6 -->
-      <section id="symmetry">
-        <div class="sec-head"><span class="sec-num">6</span><h2>Symmetry and label switching</h2></div>
-        <div class="refs">Carpenter §13.2 (identifiability) · Young et al. §3.1.2 ("we have imposed \(\lambda_1 &gt; \lambda_0\)") and §3.2 (\(\beta &lt; \tfrac12 &lt; \alpha\))</div>
-        <!-- strip -->
-        <p>
-          Swap the names of the two components: call the high one "0" and the low one "1", and replace \(\rho\) with \(1 - \rho\). Every term
-          <span class="m">\(\rho \Poisson(x \mid \lambda_1) + (1 - \rho) \Poisson(x \mid \lambda_0)\)</span> is unchanged, so the data can't tell the two labellings
-          apart. The posterior has two mirror-image modes of exactly the same height, one on each side of the diagonal \(\lambda_0 = \lambda_1\).
-          Nothing is wrong with the data. The labels just mean nothing yet.
-        </p>
-        <p>
-          Four HMC chains start at random points. Each one climbs into whichever mode is closer and stays there, because the
-          valley between the modes is too deep to cross. Then the pooled draws mix two different "answers":
-        </p>
-        <div class="section-controls">
-          <label class="toggle"><input type="checkbox" id="c-order" /> impose \(\lambda_1 &gt; \lambda_0\) (Stan's <code>positive_ordered</code>)</label>
-          <button id="c-restart">New starting points</button>
+  <!-- 6 -->
+  <section id="symmetry">
+    <h2><span class="sec-num">6</span>Symmetry and label switching</h2>
+    <aside class="a-locator">Carpenter §13.2 · Young et al. §3.1.2, §3.2</aside>
+    <!-- strip -->
+    <p>
+      Swap the names of the two components: call the high one "0" and the low one "1", and replace \(\rho\) with \(1 - \rho\). Every term
+      <span class="m">\(\rho \Poisson(x \mid \lambda_1) + (1 - \rho) \Poisson(x \mid \lambda_0)\)</span> is unchanged, so the data can't tell the two
+      labellings apart: the labels are not <a data-pv="wiki:Identifiability">identifiable</a>. The posterior has two mirror-image modes of exactly
+      the same height, one on each side of the diagonal \(\lambda_0 = \lambda_1\). Nothing is wrong with the data. The labels just mean nothing yet,
+      and samplers that wander between the mirror images are said to suffer from <a data-pv="concept:label-switching">label switching</a>.
+    </p>
+    <p>
+      Four HMC chains start at random points. Each one climbs into whichever mode is closer and stays there, because the valley between the
+      modes is too deep to cross. Then the pooled draws mix two different "answers".
+    </p>
+    <figure class="a-wide">
+      <div class="a-figctl">
+        <div class="toy-strip" role="group" aria-label="Toy counts, shared by §3 to §7">
+          <span class="strip-label">Toy counts</span>
+          <label class="ctl">λ₀ <input type="range" data-for="c-l0" /><output data-show="o-l0"></output></label>
+          <label class="ctl">λ₁ <input type="range" data-for="c-l1" /><output data-show="o-l1"></output></label>
+          <label class="ctl">ρ <input type="range" data-for="c-rho" /><output data-show="o-rho"></output></label>
+          <label class="ctl">N <input type="range" data-for="c-N" /><output data-show="o-N"></output></label>
+          <button type="button" data-click="c-seed">New sample</button>
+          <button type="button" data-click="c-dolphin">Dolphin-like</button>
+          <span class="status" data-show="status"></span>
         </div>
-        <div id="t-sym"></div>
-        <div class="grid-2">
-          <div class="card">
-            <h3>Where each chain ended up</h3>
-            <p class="sub">Post-warmup draws of \((\lambda_0, \lambda_1)\), coloured by chain. The diagonal is \(\lambda_0 = \lambda_1\), the mirror between the modes.</p>
-            <div class="plot" id="p-modes"></div>
-          </div>
-          <div class="card">
-            <h3>Trace of \(\lambda_1\)</h3>
-            <p class="sub">Chains in the mirror mode report the low rate as "\(\lambda_1\)".</p>
-            <div class="plot" id="p-symtrace"></div>
-          </div>
-        </div>
-        <div class="takeaway">
-          <b>Before averaging over \(\theta\), remove the transformations that leave the likelihood unchanged.</b> The pooled "posterior means"
-          land between the modes, describing neither. The pooled \(Q\) for a clearly high count comes out near \(\tfrac12\), which says nothing,
-          when every chain on its own is nearly certain. \(\hat R\) flags it, but only when the chains happen to disagree. If all four land
-          in the same mode (about 1 time in 8) everything looks fine by luck. The constraint \(\lambda_1 &gt; \lambda_0\) is not a hack. It is
-          what gives "component 1" (for the dolphins, "edge") its meaning: connected pairs interact <em>more</em>.
-        </div>
-      </section>
+        <label class="toggle"><input type="checkbox" id="c-order" /> impose \(\lambda_1 &gt; \lambda_0\)</label>
+        <button type="button" id="c-restart">New starting points</button>
+      </div>
+      <div class="a-panels">
+        <div class="plot" id="p-modes"></div>
+        <div class="plot" id="p-symtrace"></div>
+      </div>
+      <figcaption>
+        <b>Where each chain ended up.</b> Left: post-warmup draws of \((\lambda_0, \lambda_1)\), coloured by chain; the diagonal \(\lambda_0 = \lambda_1\) is
+        the mirror between the modes. Right: the trace of \(\lambda_1\); chains in the mirror mode report the low rate as "\(\lambda_1\)". Draw new
+        starting points until the chains disagree, then impose \(\lambda_1 &gt; \lambda_0\).
+        <span class="a-readout"><span class="a-now">Now:</span> <span id="t-sym"></span></span>
+      </figcaption>
+    </figure>
+    <p class="a-key">
+      <b>Before averaging over \(\theta\), remove the transformations that leave the likelihood unchanged.</b> The pooled "posterior means" land
+      between the modes, describing neither. The pooled \(Q\) for a clearly high count comes out near \(\tfrac12\), which says nothing, when every
+      chain on its own is nearly certain. \(\hat R\) flags it, but only when the chains happen to disagree: if all four land in the same mode
+      (about 1 time in 8) everything looks fine by luck.
+    </p>
+    <p>
+      The constraint \(\lambda_1 &gt; \lambda_0\) is not a hack.<span class="sn-mark"></span><span class="sidenote">In Stan it is the
+      <code>positive_ordered</code> type. Young et al. impose \(\lambda_1 &gt; \lambda_0\) (§3.1.2), and \(\beta &lt; \tfrac12 &lt; \alpha\) for
+      AddHealth (§3.2).</span> It is what gives "component 1" (for the dolphins, "edge") its meaning: connected pairs interact <em>more</em>.
+    </p>
+  </section>
 
-      <!-- 7 -->
-      <section id="ppc">
-        <div class="sec-head"><span class="sec-num">7</span><h2>Does the model fit? Posterior-predictive checks</h2></div>
-        <div class="refs">Carpenter §9.5 · Young et al. §3.1.2, Eq. (3.4), Figs. 4–6 · Gelman, Meng &amp; Stern (1996)</div>
-        <!-- strip -->
-        <p>
-          A well-mixed sampler only means you have computed the posterior of <em>your</em> model correctly. It says nothing about
-          whether the model describes the data. To check that, use the fitted model to generate fake data sets, one per posterior draw, and see
-          whether the real data look like one of them. The paper summarizes "look like" with a discrepancy, a KL-like distance
-          between counts and the model's expected counts <span class="m">\(m_i = \sum_k Q_i(k)\, \lambda_k\)</span>:
-        </p>
-        <div class="eq">\[ D(X; \theta) = \sum_{x_i &gt; 0} x_i \log \frac{x_i}{m_i(\theta)} \qquad\qquad p = P\bigl( D(\tilde X; \theta) &gt; D(X; \theta) \bigr) \]</div>
-        <p>
-          The data below come from a truth with a <strong>third</strong> component (a small group of very high counts) unless you switch
-          it off. Fit it with \(K = 1\), 2 or 3 components and watch the check.
-        </p>
-        <div class="section-controls">
-          <span class="ctl-group-label">Truth</span>
-          <label class="toggle"><input type="checkbox" id="c-third" checked /> add a third component</label>
-          <label class="ctl">λ₂ <input type="range" id="c-l2" min="10" max="60" step="1" value="30" /><output id="o-l2"></output></label>
-          <label class="ctl">its share <input type="range" id="c-w2" min="0.05" max="0.4" step="0.01" value="0.15" /><output id="o-w2"></output></label>
-          <span class="ctl-group-label">Fit</span>
-          <span class="seg" id="c-K">
-            <button data-k="1">K = 1</button><button data-k="2" class="on">K = 2</button><button data-k="3">K = 3</button>
-          </span>
+  <!-- 7 -->
+  <section id="ppc">
+    <h2><span class="sec-num">7</span>Does the model fit? Posterior-predictive checks</h2>
+    <aside class="a-locator">Carpenter §9.5 · Young et al. §3.1.2, Eq. (3.4), Figs. 4–6</aside>
+    <!-- strip -->
+    <p>
+      A well-mixed sampler only means you have computed the posterior of <em>your</em> model correctly. It says nothing about whether the model
+      describes the data. To check that, run a <a data-pv="concept:posterior-predictive-check">posterior-predictive check</a>: use the fitted
+      model to generate fake data sets, one per posterior draw, and see whether the real data look like one of them. The paper summarizes
+      "look like" with a discrepancy, a <a data-pv="wiki:Kullback–Leibler divergence">KL-like</a> distance between counts and the model's
+      expected counts <span class="m">\(m_i = \sum_k Q_i(k)\, \lambda_k\)</span>, and a \(p\)-value.<span class="sn-mark"></span><span class="sidenote">The
+      realized-discrepancy \(p\)-value is due to <cite data-ref="gelman1996"></cite>.</span>
+    </p>
+    <div class="eq">\[ D(X; \theta) = \sum_{x_i &gt; 0} x_i \log \frac{x_i}{m_i(\theta)} \qquad\qquad p = P\bigl( D(\tilde X; \theta) &gt; D(X; \theta) \bigr) \]</div>
+    <p>
+      The data below come from a truth with a <strong>third</strong> component (a small group of very high counts) unless you switch it off.
+      Fit it with \(K = 1\), 2 or 3 components and watch the check.
+    </p>
+    <figure class="a-wide">
+      <div class="a-figctl">
+        <div class="toy-strip" role="group" aria-label="Toy counts, shared by §3 to §7">
+          <span class="strip-label">Toy counts</span>
+          <label class="ctl">λ₀ <input type="range" data-for="c-l0" /><output data-show="o-l0"></output></label>
+          <label class="ctl">λ₁ <input type="range" data-for="c-l1" /><output data-show="o-l1"></output></label>
+          <label class="ctl">ρ <input type="range" data-for="c-rho" /><output data-show="o-rho"></output></label>
+          <label class="ctl">N <input type="range" data-for="c-N" /><output data-show="o-N"></output></label>
+          <button type="button" data-click="c-seed">New sample</button>
+          <button type="button" data-click="c-dolphin">Dolphin-like</button>
+          <span class="status" data-show="status"></span>
         </div>
-        <div id="t-ppc"></div>
-        <div class="grid-3">
-          <div class="card">
-            <h3>Real vs. replicated histograms</h3>
-            <p class="sub">Bars: the observed counts. Lines: 20 data sets simulated from posterior draws.</p>
-            <div class="plot" id="p-rep"></div>
-          </div>
-          <div class="card">
-            <h3>Observed vs. predicted, per count</h3>
-            <p class="sub">Each dot is one count against its replicate in 5 simulated data sets (the paper's Fig. 4a).</p>
-            <div class="plot" id="p-obspred"></div>
-          </div>
-          <div class="card">
-            <h3>Discrepancy: replicate vs. real</h3>
-            <p class="sub">One dot per posterior draw. Above the diagonal the fake data are further from the model than the real data (the paper's Fig. 4b).</p>
-            <div class="plot" id="p-disc"></div>
-          </div>
-        </div>
-        <div class="takeaway">
-          <b>Small \(p\) is bad and \(p\) near 1 is suspicious.</b> If the model were the truth, the real data would sit in the middle of
-          the replicates, and \(p\) would be around \(\tfrac12\). With the default truth, \(K = 1\) gives \(p \approx 0\): the real data are worse fit than
-          anything the model would generate. \(K = 2\) lands near the dolphins' 0.136. That doesn't rule the model out, but the replicate
-          histograms and the observed-vs-predicted cloud show where it fails: the highest counts get pulled into one middle component.
-          \(K = 3\) fits. A \(p\) near 1 means the real data fit <em>better</em> than the model's
-          own fake data, which is a warning sign of overfitting. That is what the paper sees for AddHealth (Fig. 6), with two free
-          error rates per student, and why it suggests beta hyperpriors.
-        </div>
-      </section>
+        <span class="ctl-group-label">Truth</span>
+        <label class="toggle"><input type="checkbox" id="c-third" checked /> add a third component</label>
+        <label class="ctl">λ₂ <input type="range" id="c-l2" min="10" max="60" step="1" value="30" /><output id="o-l2"></output></label>
+        <label class="ctl">its share <input type="range" id="c-w2" min="0.05" max="0.4" step="0.01" value="0.15" /><output id="o-w2"></output></label>
+        <span class="ctl-group-label">Fit</span>
+        <span class="seg" id="c-K">
+          <button type="button" data-k="1">K = 1</button><button type="button" data-k="2" class="on">K = 2</button><button type="button" data-k="3">K = 3</button>
+        </span>
+      </div>
+      <div class="a-panels a-panels-3">
+        <div class="plot" id="p-rep"></div>
+        <div class="plot" id="p-obspred"></div>
+        <div class="plot" id="p-disc"></div>
+      </div>
+      <figcaption>
+        <b>Real against replicated data.</b> Left: the observed counts (bars) against 20 data sets simulated from posterior draws (lines). Middle:
+        each count against its replicate in 5 simulated data sets, the paper's Fig. 4a. Right: one dot per posterior draw; above the diagonal
+        the fake data are further from the model than the real data, the paper's Fig. 4b. Fit \(K = 1\), 2 and 3 and watch \(p\).
+        <span class="a-readout"><span class="a-now">Now:</span> <span id="t-ppc"></span></span>
+      </figcaption>
+    </figure>
+    <p class="a-key">
+      <b>Small \(p\) is bad and \(p\) near 1 is suspicious.</b> If the model were the truth, the real data would sit in the middle of the
+      replicates, and \(p\) would be around \(\tfrac12\). With the default truth, \(K = 1\) gives \(p \approx 0\): the real data are worse fit than
+      anything the model would generate. \(K = 2\) lands near the dolphins' 0.136. That doesn't rule the model out, but the replicate histograms
+      and the observed-vs-predicted cloud show where it fails: the highest counts get pulled into one middle component. \(K = 3\) fits.
+    </p>
+    <p>
+      A \(p\) near 1 means the real data fit <em>better</em> than the model's own fake data, which is a warning sign of overfitting.<span class="sn-mark"></span><span class="sidenote">That
+      is what the paper sees for AddHealth (Fig. 6), with two free error rates per student, and why it suggests beta hyperpriors.</span>
+    </p>
+  </section>
 
-      <!-- 8 -->
-      <section id="bridge">
-        <div class="sec-head"><span class="sec-num">8</span><h2>From counts to networks</h2></div>
-        <!-- strip -->
-        <p>Replace "count \(i\)" with "pair of dolphins \((i, j)\)" and "label \(z\)" with "edge \(A_{ij}\)", and this page is the paper's §3.1.</p>
-        <div class="card">
-          <table class="recipe">
-            <thead><tr><th></th><th>This page</th><th>Young et al., dolphins</th></tr></thead>
-            <tbody>
-              <tr><td>Data</td><td>\(N\) counts \(x_i\)</td><td>interaction counts \(X_{ij}\) for 78 pairs of 13 dolphins</td></tr>
-              <tr><td>Discrete unknown</td><td>label \(z_i\): which Poisson</td><td>\(A_{ij}\): edge or not (or: none, weak, strong)</td></tr>
-              <tr><td>Data model</td><td>\(\Poisson(\lambda_z)\)</td><td>\(\mu_{ij}(A_{ij}) = \Poisson(X_{ij} \mid \lambda_A)\)</td></tr>
-              <tr><td>Prior on the unknown</td><td>\(P(z = 1) = \rho\)</td><td>network model \(\nu_{ij}(1) = \rho\)</td></tr>
-              <tr><td>Summing it out</td><td><span class="pill exact">exact</span> one two-term sum per count</td><td><span class="pill exact">exact</span> one sum per pair, Eq. (A.12)</td></tr>
-              <tr><td>Recovering it</td><td>\(Q_i\) per draw</td><td>\(Q_{ij}\) per draw, then sample whole networks, Eq. (A.13)</td></tr>
-              <tr><td>Symmetry breaking</td><td>\(\lambda_1 &gt; \lambda_0\)</td><td>\(\lambda_1 &gt; \lambda_0\) (AddHealth: \(\beta &lt; \tfrac12 &lt; \alpha\))</td></tr>
-              <tr><td>Model check</td><td>discrepancy \(p\)-value</td><td>\(p = 0.136\) with two edge types, 0.722 with three</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="takeaway">
-          <b>The only thing the network adds is meaning.</b> The mathematics is the same mixture. What changes is that a sample of the
-          \(z\)'s is now a sample of a <em>network</em>, so you can compute any network property and get its full posterior.
-        </div>
-      </section>
-      <!-- references -->
-      <!-- pager -->
+  <!-- 8 -->
+  <section id="bridge">
+    <h2><span class="sec-num">8</span>From counts to networks</h2>
+    <aside class="a-locator">Young et al. §3.1, Eqs. (A.12)–(A.13)</aside>
+    <!-- strip -->
+    <p>Replace "count \(i\)" with "pair of dolphins \((i, j)\)" and "label \(z\)" with "edge \(A_{ij}\)", and this page is the paper's §3.1.</p>
+    <div class="tbl">
+      <table class="recipe">
+        <thead><tr><th></th><th>This page</th><th>Young et al., dolphins</th></tr></thead>
+        <tbody>
+          <tr><td>Data</td><td data-label="This page">\(N\) counts \(x_i\)</td><td data-label="Young et al., dolphins">interaction counts \(X_{ij}\) for 78 pairs of 13 dolphins</td></tr>
+          <tr><td>Discrete unknown</td><td data-label="This page">label \(z_i\): which Poisson</td><td data-label="Young et al., dolphins">\(A_{ij}\): edge or not (or: none, weak, strong)</td></tr>
+          <tr><td>Data model</td><td data-label="This page">\(\Poisson(\lambda_z)\)</td><td data-label="Young et al., dolphins">\(\mu_{ij}(A_{ij}) = \Poisson(X_{ij} \mid \lambda_A)\)</td></tr>
+          <tr><td>Prior on the unknown</td><td data-label="This page">\(P(z = 1) = \rho\)</td><td data-label="Young et al., dolphins">network model \(\nu_{ij}(1) = \rho\)</td></tr>
+          <tr><td>Summing it out</td><td data-label="This page"><span class="tag exact">exact</span> one two-term sum per count</td><td data-label="Young et al., dolphins"><span class="tag exact">exact</span> one sum per pair, Eq. (A.12)</td></tr>
+          <tr><td>Recovering it</td><td data-label="This page">\(Q_i\) per draw</td><td data-label="Young et al., dolphins">\(Q_{ij}\) per draw, then sample whole networks, Eq. (A.13)</td></tr>
+          <tr><td>Symmetry breaking</td><td data-label="This page">\(\lambda_1 &gt; \lambda_0\)</td><td data-label="Young et al., dolphins">\(\lambda_1 &gt; \lambda_0\) (AddHealth: \(\beta &lt; \tfrac12 &lt; \alpha\))</td></tr>
+          <tr><td>Model check</td><td data-label="This page">discrepancy \(p\)-value</td><td data-label="Young et al., dolphins">\(p = 0.136\) with two edge types, 0.722 with three</td></tr>
+        </tbody>
+      </table>
     </div>
-  </main>
-</div>
+    <p class="a-key">
+      <b>The only thing the network adds is meaning.</b> The mathematics is the same mixture. What changes is that a sample of the \(z\)'s is now
+      a sample of a <em>network</em>, so you can compute any network property and get its full posterior. <a data-pv="article:dolphins">The dolphin
+      article</a> does exactly that with the real counts.
+    </p>
+  </section>
+
+  <!-- references -->
+  <!-- pager -->
+</main>
 <script type="module" src="js/app.js"></script>
+<script type="module" src="js/page.js"></script>
 </body>
 </html>

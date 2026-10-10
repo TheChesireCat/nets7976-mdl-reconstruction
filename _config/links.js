@@ -1,5 +1,5 @@
 // The link and citation pass over every built HTML page (docs/redesign-spec.md §5, §7).
-//   <a data-pv="concept:<slug>[#section]">, "article:<short>", "wiki:<Title>"
+//   <a data-pv="concept:<slug>[#section]">, "article:<short>[#section]", "wiki:<Title>"
 //       gets its href (relative, so it works under the path prefix) and its class.
 //   <cite data-ref="<key>"></cite> gets the author–year text (unless it has its own) and a link
 //       to the entry in the page's References, which replaces the <!-- references --> marker.
@@ -29,9 +29,10 @@ export function linkPass(content, outputPath) {
       if (!p) { errors.push(`unknown concept page "${slug}"`); return all; }
       href = `${root}${p.url.slice(1)}${frag ? `#${frag}` : ""}`; cls = "pv pv-concept-link";
     } else if (kind === "article") {
-      const p = registry.byShort.get(rest);
-      if (!p || p.data.kind !== "article") { errors.push(`unknown article "${rest}"`); return all; }
-      href = `${root}${p.url.slice(1)}`; cls = "pv";
+      const [short, frag] = rest.split("#");
+      const p = registry.byShort.get(short);
+      if (!p || p.data.kind !== "article") { errors.push(`unknown article "${short}"`); return all; }
+      href = `${root}${p.url.slice(1)}${frag ? `#${frag}` : ""}`; cls = "pv";
     } else if (kind === "wiki") {
       if (!external[rest]) { errors.push(`Wikipedia title "${rest}" is not in data/external.json (run npm run refresh-wiki)`); return all; }
       href = wikiUrl(external[rest]); cls = "pv ext";

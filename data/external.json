@@ -19,11 +19,27 @@
     },
     "fetched": "2026-10-10"
   },
+  "Conjugate prior": {
+    "title": "Conjugate prior",
+    "url": "https://en.wikipedia.org/wiki/Conjugate_prior",
+    "description": "Concept in probability theory",
+    "lede": "<p>In Bayesian probability theory, if, given a likelihood function \\(p(x\\mid \\theta )\\), the posterior distribution \\(p(\\theta \\mid x)\\) is in the same probability distribution family as the prior probability distribution \\(p(\\theta )\\), the prior and posterior are then called <b>conjugate distributions</b> with respect to that likelihood function and the prior is called a <b>conjugate prior</b> for the likelihood function \\(p(x\\mid \\theta )\\).</p>",
+    "thumbnail": null,
+    "fetched": "2026-10-10"
+  },
   "Identifiability": {
     "title": "Identifiability",
     "url": "https://en.wikipedia.org/wiki/Identifiability",
     "description": "Statistical property which a model must satisfy to allow precise inference",
     "lede": "<p>In statistics, <b>identifiability</b> is a property which a model must satisfy for precise inference to be possible. A model is <b>identifiable</b> if it is theoretically possible to learn the true values of this model's underlying parameters after obtaining an infinite number of observations from it. Mathematically, this is equivalent to saying that different values of the parameters must generate different probability distributions of the observable variables. Usually the model is identifiable only under certain technical restrictions, in which case the set of these requirements is called the <b>identification conditions</b>.</p>",
+    "thumbnail": null,
+    "fetched": "2026-10-10"
+  },
+  "Kullback–Leibler divergence": {
+    "title": "Kullback–Leibler divergence",
+    "url": "https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence",
+    "description": "Mathematical statistics distance measure",
+    "lede": "<p>In mathematical statistics, the <b>Kullback–Leibler</b> (<b>KL</b>) <b>divergence</b>, denoted \\(D_{\\text{KL}}(P\\parallel Q)\\), is a type of statistical distance: a measure of how much an approximating probability distribution <span class=\"texhtml mvar\" style=\"font-style:italic\">Q</span> is different from a true probability distribution <span class=\"texhtml mvar\" style=\"font-style:italic\">P</span>. Mathematically, it is defined as</p>",
     "thumbnail": null,
     "fetched": "2026-10-10"
   },
@@ -71,6 +87,18 @@
     "thumbnail": null,
     "fetched": "2026-10-10"
   },
+  "Monte Carlo integration": {
+    "title": "Monte Carlo integration",
+    "url": "https://en.wikipedia.org/wiki/Monte_Carlo_integration",
+    "description": "Numerical technique",
+    "lede": "<p>In mathematics, <b>Monte Carlo integration</b> is a technique for numerical integration using random numbers. It is a particular Monte Carlo method that numerically computes a definite integral. While other algorithms usually evaluate the integrand at a regular grid, Monte Carlo randomly chooses points at which the integrand is evaluated. This method is particularly useful for higher-dimensional integrals.</p>",
+    "thumbnail": {
+      "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/MonteCarloIntegrationCircle.svg/330px-MonteCarloIntegrationCircle.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "width": 330,
+      "height": 320
+    },
+    "fetched": "2026-10-10"
+  },
   "Monte Carlo method": {
     "title": "Monte Carlo method",
     "url": "https://en.wikipedia.org/wiki/Monte_Carlo_method",
@@ -109,6 +137,18 @@
     "description": "Distribution of new data marginalized over the posterior",
     "lede": "<p>In Bayesian statistics, the <b>posterior predictive distribution</b> is the distribution of possible unobserved values conditional on the observed values.</p>",
     "thumbnail": null,
+    "fetched": "2026-10-10"
+  },
+  "Stan (software)": {
+    "title": "Stan (software)",
+    "url": "https://en.wikipedia.org/wiki/Stan_(software)",
+    "description": "Probabilistic programming language for Bayesian inference",
+    "lede": "<p><b>Stan</b> is a probabilistic programming language for statistical inference written in C++. The Stan language is used to specify a (Bayesian) statistical model with an imperative program calculating the log probability density function.</p>",
+    "thumbnail": {
+      "source": "https://upload.wikimedia.org/wikipedia/en/8/81/Stan_%28programming%29_logo.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+      "width": 315,
+      "height": 316
+    },
     "fetched": "2026-10-10"
   }
 }
