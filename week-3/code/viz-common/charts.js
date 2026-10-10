@@ -11,7 +11,8 @@ function readPalette() {
   const cs = getComputedStyle(document.documentElement);
   const v = (name) => cs.getPropertyValue(name).trim();
   Object.assign(C, {
-    surface: v("--surface-1"), grid: v("--grid"), axis: v("--axis"),
+    // the colour a chart actually sits on: the page in the article anatomy, a card on the older layout
+    surface: v(document.querySelector(".a-article") ? "--page" : "--surface-1"), grid: v("--grid"), axis: v("--axis"),
     ink: v("--text-primary"), ink2: v("--text-secondary"), muted: v("--text-muted"),
     g1: v("--g1"), g2: v("--g2"), edge: v("--edge"), nonedge: v("--nonedge"),
     model: v("--model"), neutral: v("--neutral"),
@@ -335,4 +336,17 @@ export function tiles(container, items) {
   }
   container.appendChild(row);
   return row;
+}
+
+// A figure's "Show the numbers" table view (docs/redesign-spec.md §9): what its charts currently draw, as
+// HTML tables, so no value can only be read off a hover. tables: [{ title?, columns: [..], rows: [[..], ..] }];
+// the first cell of each row is its header.
+export function tableView(container, tables) {
+  if (!container) return;
+  const esc = (v) => String(v ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const fig = container.closest("figure")?.querySelector("figcaption b")?.textContent.replace(/\.$/, "") ?? "Figure";
+  container.innerHTML = tables.map((t) => `${t.title ? `<p class="nt-title">${esc(t.title)}</p>` : ""}<div class="nt-scroll" tabindex="0" role="region" aria-label="${esc(`${fig}: ${t.title ?? "the numbers"}`)}"><table class="nt">
+    <thead><tr>${t.columns.map((c) => `<th scope="col">${esc(c)}</th>`).join("")}</tr></thead>
+    <tbody>${t.rows.map((r) => `<tr>${r.map((v, i) => (i ? `<td>${esc(v)}</td>` : `<th scope="row">${esc(v)}</th>`)).join("")}</tr>`).join("")}</tbody>
+  </table></div>`).join("");
 }

@@ -1,7 +1,7 @@
 import * as M from "./model.js";
 import { acf, checkGradient } from "../../viz-common/mcmc.js";
 import {
-  C, el, frame, line, area, dot, label, refLine, legend, tiles, showTip, hideTip, modelRamp, isLight, fmt,
+  C, el, frame, line, area, dot, label, refLine, legend, tiles, showTip, hideTip, modelRamp, isLight, fmt, tableView,
 } from "../../../../week-3/code/viz-common/charts.js";
 import { CHAIN, clipped, band, bar, cross, traceChart, samplerClient } from "../../viz-common/charts4.js";
 
@@ -10,6 +10,8 @@ const clear = (id) => { const e = $(id); e.replaceChildren(); return e; };
 const range = (lo, hi, k) => Array.from({ length: k }, (_, i) => lo + ((hi - lo) * i) / (k - 1));
 const sci = (x) => (x === 0 ? "0" : x < 1e-3 ? x.toExponential(1).replace("e", " × 10^") : x.toFixed(3));
 const digits = (span) => Math.max(1, Math.ceil(-Math.log10(span)) + 1);
+const every = (arr, n) => arr.filter((_, i) => i % Math.max(1, Math.ceil(arr.length / n)) === 0); // about n rows from arr
+const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // ---------------------------------------------------------------------------
 // Worker plumbing: one request per section key; stale replies are dropped.
@@ -90,6 +92,7 @@ function renderToy() {
   t.xs.forEach((x) => { c[x]++; });
   const f = frame(clear("p-toy"), { height: 200, x: { domain: [-0.5, xmax + 0.5], label: "count x" }, xFormat: (v) => v.toFixed(0), y: { domain: [0, Math.max(...c) * 1.1], label: "number of pairs" }, yFormat: (v) => fmt(v, 0) });
   c.forEach((v, x) => { if (v) bar(f, x - 0.45, x + 0.45, 0, v, C.neutral).setAttribute("opacity", 0.6); });
+  tableView($("n-toy"), [{ columns: ["count x", "number of pairs"], rows: c.map((v, x) => [x, v]).filter(([, v]) => v) }]);
 }
 
 // over-dispersed starting points around a rough fit
@@ -142,6 +145,13 @@ function renderGrid() {
   line(f, lik, C.g1, { opacity: 0.9 });
   line(f, post, C.model);
   pts.forEach(([t, g], i) => { if (i % 16 === 8) el("circle", { cx: f.xs(t), cy: f.ys(g), r: 2.6, fill: C.model }, f.plot); });
+  tableView($("n-grid"), [
+    { title: "Densities on the grid (every 16th point)", columns: ["θ", "prior", "likelihood", "posterior, grid", "posterior, exact"],
+      rows: pts.filter((_, i) => i % 16 === 8).map(([t, g, ex], i) => [t.toFixed(dg + 1), fmt(prior[i * 16 + 8][1], 3), fmt(lik[i * 16 + 8][1], 3), fmt(g, 3), fmt(ex, 3)]) },
+    { title: "The posterior summarized", columns: ["summary", "value"],
+      rows: [["mean", L.mean.toFixed(dg + 1)], ["median", L.median.toFixed(dg + 1)], ["mode", Number.isFinite(L.mode) ? L.mode.toFixed(dg + 1) : "none"],
+        ["95% interval", `${L.ci[0].toFixed(dg + 1)} – ${L.ci[1].toFixed(dg + 1)}`], ["P(θ ≤ ½)", sci(L.pLeHalf)]] },
+  ]);
 
   const box2 = clear("p-summary");
   const ymax2 = Math.max(...post.map((q) => q[1])) * 1.3;
@@ -218,6 +228,14 @@ function renderMC() {
   band(f2, bandPts, C.model);
   refLine(f2, [[0, L.mean], [Math.max(lm, 0.5), L.mean]], C.ink2);
   line(f2, run, C.neutral, { "stroke-width": 1.5 });
+  tableView($("n-mc"), [
+    { title: "Histogram of the draws against the exact posterior", columns: ["θ, bin centre", "draws (density)", "exact density"],
+      rows: dens.map((d, k) => [L.lo + (k + 0.5) * w, d]).filter(([, d]) => d > 0)
+        .map(([t, d]) => [t.toFixed(dg + 1), fmt(d, 2), fmt(Math.exp(M.betaLogPdf(t, L.A, L.B)), 2)]) },
+    { title: "The running mean", columns: ["draws m", "running mean", "exact ± 2 MC standard errors"],
+      rows: [1, 10, 100, 1000, 10000].filter((m) => m <= Mn).map((m) => [m.toLocaleString(), (draws.slice(0, m).reduce((a, v) => a + v, 0) / m).toFixed(dg + 1),
+        `${L.mean.toFixed(dg + 1)} ± ${((2 * L.sd) / Math.sqrt(m)).toPrecision(2)}`]) },
+  ]);
 }
 
 // ---------------------------------------------------------------------------
@@ -328,11 +346,37 @@ function renderMCMC() {
   refLine(f, [[0, 0], [40, 0]], C.axis);
   line(f, a1.map((v, i) => [i, v]), C.g2);
   line(f, a2.map((v, i) => [i, v]), C.model);
+  tableView($("n-acf"), [{ columns: ["lag k", "Metropolis", "HMC"], rows: a1.map((v, k) => [k, v.toFixed(2), a2[k].toFixed(2)]).filter((_, k) => k % 5 === 0) }]);
+  const chainRows = (res, name) => res.chains.map((c, k) => {
+    const v = c.params.slice(W).map((p) => p.lam[1]);
+    const m = v.reduce((a, x) => a + x, 0) / v.length;
+    return [`${name}, chain ${k + 1}`, m.toFixed(2), Math.sqrt(v.reduce((a, x) => a + (x - m) ** 2, 0) / (v.length - 1)).toFixed(2)];
+  });
+  tableView($("n-trace"), [
+    { title: "λ₁ after warmup, per chain", columns: ["chain", "mean λ₁", "sd λ₁"], rows: [...chainRows(S.mh, "Metropolis"), ...chainRows(S.hmc, "HMC")] },
+    { title: "Diagnostics", columns: ["sampler", "accepted", "R̂", "ESS (worst)", "ESS / 1000 evaluations"],
+      rows: [["Metropolis", S.mh], ["HMC", S.hmc]].map(([n, r]) => [n, `${Math.round(100 * r.diagnostics.accept)}%`, r.diagnostics.rhat.toFixed(3), Math.round(r.diagnostics.ess), fmt((1000 * r.diagnostics.ess) / r.diagnostics.evals, 1)]) },
+  ]);
+  pathTable();
+}
+
+// Figure 4's table: the shown steps of chain 1 for each sampler.
+function pathTable() {
+  const show = mcmcSettings().show;
+  const row = (res, name) => {
+    const steps = res.chains[0].steps.slice(0, show), acc = steps.filter((q) => q.ok).length;
+    const end = steps.length ? (steps.at(-1).ok ? (steps.at(-1).to ?? steps.at(-1).path.at(-1)) : steps.at(-1).from) : null;
+    return [name, steps.length, acc, steps.length ? `${Math.round((100 * acc) / steps.length)}%` : "–", end ? `(${end[0].toFixed(2)}, ${end[1].toFixed(2)})` : "–"];
+  };
+  tableView($("n-path"), [{ columns: ["sampler", "steps shown", "accepted", "acceptance", "last position (λ₀, λ₁)"], rows: [row(S.mh, "Metropolis"), row(S.hmc, "HMC")] }]);
 }
 
 let playTimer = null;
+const redrawPaths = () => { syncMCMC(); renderPath("p-path-mh", S.mh, "mh"); renderPath("p-path-hmc", S.hmc, "hmc"); pathTable(); };
 function togglePlay() {
   if (playTimer) { clearInterval(playTimer); playTimer = null; $("c-play").textContent = "▶ Play"; return; }
+  if (reduceMotion()) { $("c-show").value = 60; redrawPaths(); return; } // no animation: jump to the end; Step walks it
+
   $("c-show").value = 1;
   $("c-play").textContent = "■ Stop";
   playTimer = setInterval(() => {
@@ -393,6 +437,11 @@ function renderCorr() {
   const f3 = frame(clear("p-ar-mean"), { height: 220, x: { domain: [lo, hi], label: "average of 100 draws (truth = 0)" }, xFormat: (v) => v.toFixed(1), y: { domain: [0, Math.max(...dens, ...ref.map((p) => p[1])) * 1.1], label: "density" }, yFormat: (v) => v.toFixed(0) });
   dens.forEach((d, k) => { if (d > 0) bar(f3, lo + k * w, lo + (k + 1) * w, 0, d, C.model).setAttribute("opacity", 0.6); });
   line(f3, ref, C.neutral);
+  tableView($("n-corr"), [
+    { title: "The first 60 draws (every 5th)", columns: ["iteration", "x"], rows: pts.filter(([i]) => i % 5 === 0).map(([i, v]) => [i, v.toFixed(2)]) },
+    { title: "Averages of 100 draws over 500 reruns", columns: ["average, bin centre", "this φ (density)", "independent draws (density)"],
+      rows: dens.map((d, k) => [lo + (k + 0.5) * w, d]).filter(([, d]) => d > 0).map(([x, d]) => [x.toFixed(2), d.toFixed(2), (Math.exp(-0.5 * x * x * N) * Math.sqrt(N / (2 * Math.PI))).toFixed(2)]) },
+  ]);
 }
 
 // ---------------------------------------------------------------------------
@@ -459,6 +508,9 @@ function renderMarg() {
     d.addEventListener("pointermove", (e) => showTip(e, [{ value: `${c1[x]} of ${n}`, label: "from λ₁" }, { value: (Qs[x].reduce((s, v) => s + v, 0) / Qs[x].length).toFixed(3), label: "posterior Q(x)" }], `count ${x}`));
     d.addEventListener("pointerleave", hideTip);
   }
+  tableView($("n-marg"), [{ columns: ["count x", "from λ₀", "from λ₁", "fitted mixture", "Q(x)", "Q(x), 90% band", "true share from λ₁"],
+    rows: xsQ.filter((x) => c0[x] + c1[x] > 0).map((x) => [x, c0[x], c1[x], expct[x][1].toFixed(1), (Qs[x].reduce((a, v) => a + v, 0) / Qs[x].length).toFixed(3),
+      `${q(Qs[x], 0.05).toFixed(3)} – ${q(Qs[x], 0.95).toFixed(3)}`, (c1[x] / (c0[x] + c1[x])).toFixed(2)]) }]);
 }
 
 // ---------------------------------------------------------------------------
@@ -514,6 +566,11 @@ function renderSym() {
   res.chains.forEach((c, k) => { const p = c.params[0]; el("circle", { cx: f.xs(p.lam[0]), cy: f.ys(p.lam[1]), r: 5, fill: "none", stroke: CHAIN[k], "stroke-width": 2 }, f.plot); });
 
   traceChart(clear("p-symtrace"), res.chains.map((c) => c.params), (p) => p.lam[1], W, { yLabel: "λ₁" });
+  tableView($("n-sym"), [{ columns: ["chain", "start (λ₀, λ₁)", "mean λ₀", "mean λ₁", "mode"],
+    rows: post.map((c, k) => {
+      const m = (f) => c.reduce((a, p) => a + f(p), 0) / c.length, s0 = res.chains[k].params[0].lam;
+      return [`chain ${k + 1}`, `(${s0[0].toFixed(1)}, ${s0[1].toFixed(1)})`, m((p) => p.lam[0]).toFixed(2), m((p) => p.lam[1]).toFixed(2), inMode[k] ? "λ₁ > λ₀" : "mirror"];
+    }) }]);
 }
 
 // ---------------------------------------------------------------------------
@@ -583,6 +640,11 @@ function renderPPC() {
   draws.forEach((d) => el("circle", { cx: f3.xs(d.dData), cy: f3.ys(d.dRep), r: 2.4, fill: d.dRep > d.dData ? C.model : C.neutral, opacity: 0.7 }, f3.plot));
   const tt = el("text", { x: f3.margin.l + 8, y: f3.margin.t + 14, class: "direct-label strong" }, f3.plot);
   tt.textContent = `p = ${p.toFixed(3)}`;
+  const repMean = obs.map((_, x) => reps.reduce((a, h) => a + h[x], 0) / reps.length);
+  tableView($("n-ppc"), [
+    { title: "Observed against replicated counts", columns: ["count x", "observed", "mean of 20 replicates"], rows: obs.map((v, x) => [x, v, repMean[x].toFixed(1)]).filter(([, v], x) => v || repMean[x] >= 0.5) },
+    { title: "Discrepancies over posterior draws", columns: ["quantity", "value"], rows: [["posterior draws", draws.length], ["replicate further off than the real data", draws.filter((d) => d.dRep > d.dData).length], ["p", p.toFixed(3)]] },
+  ]);
 }
 
 // ---------------------------------------------------------------------------
@@ -621,7 +683,8 @@ $("c-dolphin").addEventListener("click", () => {
 $("c-M").addEventListener("input", renderMC);
 $("c-mc").addEventListener("click", () => { S.mcSeed++; renderMC(); });
 ["c-mh", "c-eps", "c-L", "c-it"].forEach((id) => $(id).addEventListener("input", () => { syncMCMC(); mcmcChanged(); }));
-$("c-show").addEventListener("input", () => { syncMCMC(); renderPath("p-path-mh", S.mh, "mh"); renderPath("p-path-hmc", S.hmc, "hmc"); });
+$("c-show").addEventListener("input", redrawPaths);
+$("c-step").addEventListener("click", () => { const v = +$("c-show").value; $("c-show").value = v >= 60 ? 1 : v + 1; redrawPaths(); });
 $("c-play").addEventListener("click", togglePlay);
 $("c-phi").addEventListener("input", renderCorr);
 $("c-phipreset").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; $("c-phi").value = b.dataset.phi; renderCorr(); });

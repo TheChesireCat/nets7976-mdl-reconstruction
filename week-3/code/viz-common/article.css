@@ -20,11 +20,11 @@
 .a-article a.pv.ext { color: var(--text-primary); text-decoration-style: dotted; }
 
 /* ---------- the margin: locators (unnumbered, level with the heading) and numbered sidenotes ---------- */
-.a-locator, .a-article .sidenote {
+.a-article .a-locator, .a-article .sidenote {
   float: right; clear: right; width: var(--gutter); margin: 4px calc(-1 * (var(--gutter) + var(--gap))) 12px 0;
   font-size: 13.5px; line-height: 1.5; color: var(--text-muted);
 }
-.a-locator { margin-top: -50px; color: var(--text-secondary); }
+.a-article .a-locator { margin-top: -50px; color: var(--text-secondary); }
 /* a locator floats in its section, whose right edge is already the margin's (sidenotes float in a 680px paragraph) */
 @media (min-width: 1061px) { .a-article section > .a-locator { margin-right: 0; } }
 .a-article .sn-mark { counter-increment: sn; font-size: 12px; vertical-align: super; line-height: 0; color: var(--model); }
@@ -92,10 +92,10 @@ details.a-dig p { font-size: 16px; }
 @media (max-width: 1060px) {
   .a-article { max-width: calc(var(--text) + 48px); }
   .a-article h2 .sec-num { position: static; margin-right: 12px; }
-  .a-locator, .a-article .sidenote {
+  .a-article .a-locator, .a-article .sidenote {
     float: none; display: block; width: auto; margin: 10px 0 14px; padding-left: 12px; border-left: 2px solid var(--border);
   }
-  .a-locator { margin: -10px 0 14px; border-left: 0; padding-left: 0; }
+  .a-article .a-locator { margin: -10px 0 14px; border-left: 0; padding-left: 0; }
   .a-panels-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
@@ -131,3 +131,25 @@ details.a-dig p { font-size: 16px; }
   .a-article .tbl td[data-label]::before { content: attr(data-label); display: block; font-size: 12px; color: var(--text-muted); }
   .a-article .tbl td + td + td { margin-top: 4px; }
 }
+
+/* ---------- "Show the numbers": each figure's table view ---------- */
+details.a-numbers { margin-top: 8px; max-width: var(--text); font-size: 13.5px; }
+details.a-numbers > summary { cursor: pointer; color: var(--model); font-weight: 500; }
+details.a-numbers[open] > summary { margin-bottom: 8px; }
+.nt-title { margin: 10px 0 4px !important; font-weight: 600; color: var(--text-primary); font-size: 13px; }
+.nt-scroll { overflow-x: auto; }
+.nt { border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.nt th, .nt td { padding: 4px 12px 4px 0; text-align: right; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+.nt thead th { color: var(--text-muted); font-weight: 500; border-bottom-color: var(--axis); }
+.nt tbody th { text-align: left; font-weight: 500; color: var(--text-primary); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .plot { transition: none; }
+}
+
+/* readout states: text stays in text colours; a warning carries a sign as well as its colour */
+.a-readout .tile.good .tile-value { color: var(--text-primary); }
+.a-readout .tile.bad .tile-value { color: var(--warn); }
+.a-readout .tile.bad .tile-value::before { content: "⚠ "; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

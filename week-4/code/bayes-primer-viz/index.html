@@ -54,7 +54,7 @@ route:
   <!-- 1 -->
   <section id="grid">
     <h2><span class="sec-num">1</span>Bayes on a grid</h2>
-    <aside class="a-locator">Carpenter §5</aside>
+    <p class="a-locator">Carpenter §5</p>
     <!-- strip -->
     <p>
       Laplace asked whether a birth is more likely to be a boy.<span class="sn-mark"></span><span class="sidenote">The counts are Laplace's live births in Paris, 1745 to 1770.</span>
@@ -88,8 +88,8 @@ route:
         <label class="ctl">share of Laplace's data <input type="range" id="c-frac" min="-4" max="0" step="0.25" value="-3" /><output id="o-frac"></output></label>
       </div>
       <div class="a-panels">
-        <div class="plot" id="p-grid"></div>
-        <div class="plot" id="p-summary"></div>
+        <div class="plot" id="p-grid" data-label="Chart: prior, likelihood and posterior densities of θ, with the grid approximation as dots"></div>
+        <div class="plot" id="p-summary" data-label="Chart: the posterior density of θ with its mean, median, mode and central 95% interval"></div>
       </div>
       <figcaption>
         <b>Prior × likelihood → posterior.</b> Left: the grid approximation (dots) against the exact Beta (line). The likelihood is scaled to
@@ -98,6 +98,7 @@ route:
         Raise prior a to 40, then slide the data share to 100%.
         <span class="a-readout"><span class="a-now">Now:</span> <span id="t-grid"></span></span>
       </figcaption>
+      <details class="a-numbers"><summary>Show the numbers</summary><div id="n-grid"></div></details>
     </figure>
     <p class="a-key">
       <b>Data overwhelm the prior.</b> With 0.01% of the data, about 20 births, the prior sliders move the posterior a lot. Slide to the full
@@ -112,7 +113,7 @@ route:
   <!-- 2 -->
   <section id="mc">
     <h2><span class="sec-num">2</span>Monte Carlo: answers from draws</h2>
-    <aside class="a-locator">Carpenter §3.3, §5.8–5.9</aside>
+    <p class="a-locator">Carpenter §3.3, §5.8–5.9</p>
     <!-- strip -->
     <p>
       Every posterior summary is an expectation: the mean is <span class="m">\(\mathbb{E}[\theta]\)</span>, and a probability like
@@ -127,8 +128,8 @@ route:
         <button type="button" id="c-mc">New draws</button>
       </div>
       <div class="a-panels">
-        <div class="plot" id="p-mchist"></div>
-        <div class="plot" id="p-mcrun"></div>
+        <div class="plot" id="p-mchist" data-label="Chart: histogram of the Monte Carlo draws against the exact posterior density"></div>
+        <div class="plot" id="p-mcrun" data-label="Chart: the running mean of the draws against the number of draws, with a ±2 standard-error band"></div>
       </div>
       <figcaption>
         <b>Answers from draws.</b> Left: a histogram of \(M\) independent draws against the exact posterior (line); nothing here uses the
@@ -136,6 +137,7 @@ route:
         \(\pm 2\) Monte Carlo standard error band. Slide \(M\) from 10 up to 10,000 and watch the band narrow.
         <span class="a-readout"><span class="a-now">Now:</span> <span id="t-mc"></span></span>
       </figcaption>
+      <details class="a-numbers"><summary>Show the numbers</summary><div id="n-mc"></div></details>
     </figure>
     <p class="a-key">
       <b>Counting cannot see rare events.</b> With the full data the estimate of \(P(\theta \le \tfrac12)\) is exactly 0 for any \(M\) you could
@@ -149,7 +151,7 @@ route:
   <!-- 3 -->
   <section id="toy">
     <h2><span class="sec-num">3</span>The toy problem: friends and strangers</h2>
-    <aside class="a-locator">Young et al. §3.1</aside>
+    <p class="a-locator">Young et al. §3.1</p>
     <!-- strip -->
     <p>
       You have <span class="m">\(N\)</span> counts, each one how often a pair of animals was seen together.<span class="sn-mark"></span><span class="sidenote">This is
@@ -184,12 +186,13 @@ route:
           <span class="status" id="status"></span>
         </div>
       </div>
-      <div class="plot" id="p-toy"></div>
+      <div class="plot" id="p-toy" data-label="Chart: histogram of the toy counts"></div>
       <figcaption>
         <b>What you observe.</b> The \(N\) counts, with no labels: which come from friends is exactly what you can't see, and §5 colours them in.
         The same strip of toy counts sits above every figure up to §7, and every copy moves the others. Drag λ₁ down towards λ₀ and watch the
         two humps merge. <span class="a-readout" id="t-toy"></span>
       </figcaption>
+      <details class="a-numbers"><summary>Show the numbers</summary><div id="n-toy"></div></details>
     </figure>
     <p class="a-key">
       <b>\(z\) is discrete, so the samplers never touch it.</b> HMC needs a gradient, so §4 and §5 use the likelihood with \(z\)
@@ -204,7 +207,7 @@ route:
   <!-- 4 -->
   <section id="mcmc">
     <h2><span class="sec-num">4</span>When you can't draw directly: Metropolis vs. HMC</h2>
-    <aside class="a-locator">Carpenter §1.2, §3.4, §6 · Young et al. §3.1.2, Fig. 3</aside>
+    <p class="a-locator">Carpenter §1.2, §3.4, §6 · Young et al. §3.1.2, Fig. 3</p>
     <!-- strip -->
     <p>
       To make the posterior visible, this section holds \(\rho\) at its true value (\(z\) is summed out, as in §3), so the posterior of the
@@ -237,10 +240,11 @@ route:
         <label class="ctl">iterations <input type="range" id="c-it" min="200" max="3000" step="100" value="1000" /><output id="o-it"></output></label>
         <label class="ctl">show first <input type="range" id="c-show" min="1" max="60" step="1" value="60" /><output id="o-show"></output> steps of chain 1</label>
         <button type="button" id="c-play">▶ Play</button>
+        <button type="button" id="c-step" title="Show one more step of chain 1">Step</button>
       </div>
       <div class="a-panels">
-        <div class="plot" id="p-path-mh"></div>
-        <div class="plot" id="p-path-hmc"></div>
+        <div class="plot" id="p-path-mh" data-label="Chart: the first steps of a Metropolis chain on the posterior surface over λ₀ and λ₁"></div>
+        <div class="plot" id="p-path-hmc" data-label="Chart: the first HMC trajectories on the posterior surface over λ₀ and λ₁"></div>
       </div>
       <figcaption>
         <b>Metropolis (left) against HMC (right) on the same posterior.</b> Background: the posterior; a stronger colour is more probable.
@@ -248,18 +252,19 @@ route:
         steps, and its end point is the proposal. Try a huge Metropolis step (almost nothing is accepted), a tiny one (every move is accepted
         but goes nowhere), or an HMC \(\varepsilon\) so large that the trajectories fly off and get rejected. Then try \(L = 10\).
       </figcaption>
+      <details class="a-numbers"><summary>Show the numbers</summary><div id="n-path"></div></details>
     </figure>
     <p>
       At \(L = 10\) and this \(\varepsilon\) a trajectory curls back to where it started, so the extra work buys nothing.<span class="sn-mark"></span><span class="sidenote">That
       is why Stan uses NUTS, the No-U-Turn Sampler, which picks the length of each trajectory by itself.</span>
-      Two numbers say whether to trust the chains. <a data-pv="concept:markov-chain-monte-carlo#diagnostics">\(\hat R\)</a> compares the chains with
+      Two numbers say whether to trust the chains. <a data-pv="concept:markov-chain-monte-carlo#diagnostics" aria-label="R-hat">\(\hat R\)</a> compares the chains with
       each other, and with the two halves of themselves: it is near 1 when they all describe the same distribution, and above about 1.01 means
       keep going. The effective sample size (ESS) is how many independent draws the correlated ones are worth.
     </p>
     <figure class="a-wide">
       <div class="a-panels">
-        <div class="a-panel"><p class="a-panel-h">Metropolis</p><div class="plot" id="p-trace-mh"></div></div>
-        <div class="a-panel"><p class="a-panel-h">HMC</p><div class="plot" id="p-trace-hmc"></div></div>
+        <div class="a-panel"><p class="a-panel-h">Metropolis</p><div class="plot" id="p-trace-mh" data-label="Chart: trace of λ₁ for four Metropolis chains"></div></div>
+        <div class="a-panel"><p class="a-panel-h">HMC</p><div class="plot" id="p-trace-hmc" data-label="Chart: trace of λ₁ for four HMC chains"></div></div>
       </div>
       <figcaption>
         <b>Trace of \(\lambda_1\), four chains.</b> ESS per 1000 evaluations is the fair comparison, because each HMC step costs \(L\) gradient
@@ -267,13 +272,15 @@ route:
         <span class="a-readout"><span class="a-now">Metropolis:</span> <span id="t-mh"></span></span>
         <span class="a-readout"><span class="a-now">HMC:</span> <span id="t-hmc"></span></span>
       </figcaption>
+      <details class="a-numbers"><summary>Show the numbers</summary><div id="n-trace"></div></details>
     </figure>
     <figure class="a-wide">
-      <div class="plot" id="p-acf"></div>
+      <div class="plot" id="p-acf" data-label="Chart: autocorrelation of λ₁ against lag for Metropolis and HMC"></div>
       <figcaption>
         <b>Autocorrelation of \(\lambda_1\)</b> (chain 1, after warmup): how similar a draw is to the one \(k\) steps earlier. The faster it falls
         to 0, the more each draw is worth.
       </figcaption>
+      <details class="a-numbers"><summary>Show the numbers</summary><div id="n-acf"></div></details>
     </figure>
     <p>
       With only two parameters a well-tuned Metropolis sampler does fine. The gap grows with the number of parameters.<span class="sn-mark"></span><span class="sidenote">On
@@ -298,9 +305,9 @@ route:
           </span>
         </div>
         <div class="a-panels a-panels-3">
-          <div class="plot" id="p-ar-trace"></div>
-          <div class="plot" id="p-ar-lag"></div>
-          <div class="plot" id="p-ar-mean"></div>
+          <div class="plot" id="p-ar-trace" data-label="Chart: the first 60 draws of the correlated chain"></div>
+          <div class="plot" id="p-ar-lag" data-label="Chart: each draw of the correlated chain against the next"></div>
+          <div class="plot" id="p-ar-mean" data-label="Chart: histogram of the averages of 100 draws, against independent draws"></div>
         </div>
         <figcaption>
           <b>The same target, \(\mathcal{N}(0, 1)\), three ways.</b> Left: the first 60 draws; only the path through the target differs. Middle:
@@ -308,6 +315,7 @@ route:
           over 500 independent reruns (bars), against what 100 independent draws give (line). Compare sticky with zig-zag.
           <span class="a-readout"><span class="a-now">Now:</span> <span id="t-corr"></span></span>
         </figcaption>
+      <details class="a-numbers"><summary>Show the numbers</summary><div id="n-corr"></div></details>
       </figure>
       <p class="a-key">
         <b>The effective sample size counts how much the errors cancel.</b> For this chain the autocorrelation time is
@@ -325,7 +333,7 @@ route:
   <!-- 5 -->
   <section id="marg">
     <h2><span class="sec-num">5</span>Summing out a discrete unknown</h2>
-    <aside class="a-locator">Carpenter §11 · Young et al. Eqs. (A.12)–(A.14)</aside>
+    <p class="a-locator">Carpenter §11 · Young et al. Eqs. (A.12)–(A.14)</p>
     <!-- strip -->
     <p>
       Now \(\rho\) is unknown too, and so is each count's label <span class="m">\(z_i\)</span> (which Poisson it came from). HMC needs a gradient,
@@ -358,8 +366,8 @@ route:
         </div>
       </div>
       <div class="a-panels">
-        <div class="plot" id="p-hist"></div>
-        <div class="plot" id="p-Q"></div>
+        <div class="plot" id="p-hist" data-label="Chart: histogram of the counts split by hidden label, with the fitted mixture"></div>
+        <div class="plot" id="p-Q" data-label="Chart: posterior probability Q(x) that a count came from the λ₁ component, with a 90% band"></div>
       </div>
       <figcaption>
         <b>The counts, and the label recovered.</b> Left: how many counts took each value, split by their true (hidden) label, with the model's
@@ -367,6 +375,7 @@ route:
         component (line, 90% band over draws), against the true share among these data (dots). Push λ₀ and λ₁ together to widen the overlap.
         <span class="a-readout"><span class="a-now">Now:</span> <span id="t-marg"></span></span>
       </figcaption>
+      <details class="a-numbers"><summary>Show the numbers</summary><div id="n-marg"></div></details>
     </figure>
     <p class="a-key">
       <b>Marginalize, sample, then condition.</b> That is the paper's algorithm. It works here, as it does for the dolphins, because the labels
@@ -378,7 +387,7 @@ route:
   <!-- 6 -->
   <section id="symmetry">
     <h2><span class="sec-num">6</span>Symmetry and label switching</h2>
-    <aside class="a-locator">Carpenter §13.2 · Young et al. §3.1.2, §3.2</aside>
+    <p class="a-locator">Carpenter §13.2 · Young et al. §3.1.2, §3.2</p>
     <!-- strip -->
     <p>
       Swap the names of the two components: call the high one "0" and the low one "1", and replace \(\rho\) with \(1 - \rho\). Every term
@@ -407,8 +416,8 @@ route:
         <button type="button" id="c-restart">New starting points</button>
       </div>
       <div class="a-panels">
-        <div class="plot" id="p-modes"></div>
-        <div class="plot" id="p-symtrace"></div>
+        <div class="plot" id="p-modes" data-label="Chart: post-warmup draws of λ₀ and λ₁ for four chains, with the diagonal λ₀ = λ₁"></div>
+        <div class="plot" id="p-symtrace" data-label="Chart: trace of λ₁ for four HMC chains in the symmetric model"></div>
       </div>
       <figcaption>
         <b>Where each chain ended up.</b> Left: post-warmup draws of \((\lambda_0, \lambda_1)\), coloured by chain; the diagonal \(\lambda_0 = \lambda_1\) is
@@ -416,6 +425,7 @@ route:
         starting points until the chains disagree, then impose \(\lambda_1 &gt; \lambda_0\).
         <span class="a-readout"><span class="a-now">Now:</span> <span id="t-sym"></span></span>
       </figcaption>
+      <details class="a-numbers"><summary>Show the numbers</summary><div id="n-sym"></div></details>
     </figure>
     <p class="a-key">
       <b>Before averaging over \(\theta\), remove the transformations that leave the likelihood unchanged.</b> The pooled "posterior means" land
@@ -433,7 +443,7 @@ route:
   <!-- 7 -->
   <section id="ppc">
     <h2><span class="sec-num">7</span>Does the model fit? Posterior-predictive checks</h2>
-    <aside class="a-locator">Carpenter §9.5 · Young et al. §3.1.2, Eq. (3.4), Figs. 4–6</aside>
+    <p class="a-locator">Carpenter §9.5 · Young et al. §3.1.2, Eq. (3.4), Figs. 4–6</p>
     <!-- strip -->
     <p>
       A well-mixed sampler only means you have computed the posterior of <em>your</em> model correctly. It says nothing about whether the model
@@ -470,9 +480,9 @@ route:
         </span>
       </div>
       <div class="a-panels a-panels-3">
-        <div class="plot" id="p-rep"></div>
-        <div class="plot" id="p-obspred"></div>
-        <div class="plot" id="p-disc"></div>
+        <div class="plot" id="p-rep" data-label="Chart: observed count histogram against 20 replicated histograms"></div>
+        <div class="plot" id="p-obspred" data-label="Chart: each observed count against its replicated count"></div>
+        <div class="plot" id="p-disc" data-label="Chart: discrepancy of replicated data against discrepancy of the real data, one dot per draw"></div>
       </div>
       <figcaption>
         <b>Real against replicated data.</b> Left: the observed counts (bars) against 20 data sets simulated from posterior draws (lines). Middle:
@@ -480,6 +490,7 @@ route:
         the fake data are further from the model than the real data, the paper's Fig. 4b. Fit \(K = 1\), 2 and 3 and watch \(p\).
         <span class="a-readout"><span class="a-now">Now:</span> <span id="t-ppc"></span></span>
       </figcaption>
+      <details class="a-numbers"><summary>Show the numbers</summary><div id="n-ppc"></div></details>
     </figure>
     <p class="a-key">
       <b>Small \(p\) is bad and \(p\) near 1 is suspicious.</b> If the model were the truth, the real data would sit in the middle of the
@@ -496,12 +507,12 @@ route:
   <!-- 8 -->
   <section id="bridge">
     <h2><span class="sec-num">8</span>From counts to networks</h2>
-    <aside class="a-locator">Young et al. §3.1, Eqs. (A.12)–(A.13)</aside>
+    <p class="a-locator">Young et al. §3.1, Eqs. (A.12)–(A.13)</p>
     <!-- strip -->
     <p>Replace "count \(i\)" with "pair of dolphins \((i, j)\)" and "label \(z\)" with "edge \(A_{ij}\)", and this page is the paper's §3.1.</p>
     <div class="tbl">
       <table class="recipe">
-        <thead><tr><th></th><th>This page</th><th>Young et al., dolphins</th></tr></thead>
+        <thead><tr><th><span class="sr-only">Part of the model</span></th><th>This page</th><th>Young et al., dolphins</th></tr></thead>
         <tbody>
           <tr><td>Data</td><td data-label="This page">\(N\) counts \(x_i\)</td><td data-label="Young et al., dolphins">interaction counts \(X_{ij}\) for 78 pairs of 13 dolphins</td></tr>
           <tr><td>Discrete unknown</td><td data-label="This page">label \(z_i\): which Poisson</td><td data-label="Young et al., dolphins">\(A_{ij}\): edge or not (or: none, weak, strong)</td></tr>

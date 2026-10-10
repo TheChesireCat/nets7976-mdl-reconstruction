@@ -64,3 +64,18 @@ const ready = () => (window.MathJax?.startup?.promise ? window.MathJax.startup.p
 ready();
 let t = null;
 addEventListener("resize", () => { clearTimeout(t); t = setTimeout(cues, 250); });
+
+// ---------- charts as images, for screen readers ----------
+// Each .plot carries data-label; the chart drawn into it (SVG or canvas) is announced as an image with that label.
+// The caption describes it, and the "Show the numbers" table under it holds the values.
+const labelChart = (plot) => {
+  for (const c of plot.querySelectorAll("svg, canvas")) {
+    if (c.closest(".legend, .ramp-legend") || c.parentElement.closest("svg")) continue; // swatches and nested svgs aren't charts
+    c.setAttribute("role", "img");
+    c.setAttribute("aria-label", plot.dataset.label);
+  }
+};
+for (const plot of document.querySelectorAll(".plot[data-label]")) {
+  labelChart(plot);
+  new MutationObserver(() => labelChart(plot)).observe(plot, { childList: true, subtree: true });
+}

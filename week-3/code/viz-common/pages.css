@@ -150,3 +150,4 @@ body.sp-dim::before { content: ""; position: fixed; inset: 0; z-index: 44; backg
 .toc-secs a { display: inline-flex; gap: 8px; color: var(--text-secondary); text-decoration: none; padding: 2px 0; }
 .toc-secs a:hover { color: var(--text-primary); }
 @media (max-width: 720px) { .toc-secs { columns: 1; } .toc-reading, .toc-lede, .toc-secs { margin-left: 0 !important; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
